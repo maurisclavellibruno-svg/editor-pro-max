@@ -1,10 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { isSlotAvailable } from "@/lib/availability";
 import { notifications } from "@/lib/notifications";
 import { createBookingSchema } from "@/schemas/booking";
 import { dateWithMinutes, timeToMinutes } from "@/lib/time";
+import { isRateLimited } from "@/lib/rate-limit";
 
 export interface CreateBookingResult {
   ok: boolean;
@@ -13,6 +15,12 @@ export interface CreateBookingResult {
 }
 
 export async function createBooking(formData: FormData): Promise<CreateBookingResult> {
+  const headersList = await headers();
+  const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (isRateLimited(`booking:${ip}`, 5, 10 * 60 * 1000)) {
+    return { ok: false, error: "Demasiados intentos. Probá de nuevo en unos minutos." };
+  }
+
   const raw = {
     serviceId: formData.get("serviceId"),
     date: formData.get("date"),

@@ -128,15 +128,36 @@ model Customer {
   instagram String?
   birthDate DateTime?
 
-  // Free-form private notes in v1 (favorite cut, how they like their beard,
-  // music, preferences, etc). Structured fields land in the CRM phase.
+  // Structured private notes, so the barber recognizes the client better
+  // every time they come back.
+  favoriteCut         String?
+  beardPreference     String?
+  musicPreference     String?
+  likesToTalk         Boolean?
+  productsUsed        String?
+  hairColor           String?
+  generalPreferences  String?
+  likedNotes          String?
+  dislikedNotes       String?
+
+  // Free-form catch-all for anything that doesn't fit the fields above.
   notes String @default("")
 
   bookings  Booking[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  photos    CustomerPhoto[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 
   @@unique([phone])
+}
+
+model CustomerPhoto {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  url        String
+  caption    String   @default("")
+  createdAt  DateTime @default(now())
 }
 
 // ---------------------------------------------------------------------------
@@ -187,9 +208,37 @@ model Booking {
 
   notes String @default("")
 
+  // Set once a reminder email has been sent, so the reminder scan never
+  // sends the same booking twice.
+  reminderSentAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([employeeId, startAt, endAt])
   @@index([customerId])
+}
+
+// ---------------------------------------------------------------------------
+// Finance — manual income/expense ledger. Booking payments already count as
+// income automatically (via paymentStatus = PAID) and are NOT duplicated
+// here; this table is only for entries with no booking behind them
+// (product sales, rent, supplies, etc).
+// ---------------------------------------------------------------------------
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Transaction {
+  id          String          @id @default(cuid())
+  type        TransactionType
+  amount      Decimal         @db.Decimal(10, 2)
+  method      PaymentMethod?
+  description String
+  date        DateTime
+  createdAt   DateTime        @default(now())
+
+  @@index([date])
 }

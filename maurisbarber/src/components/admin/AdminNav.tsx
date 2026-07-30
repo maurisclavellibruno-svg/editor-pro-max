@@ -6,8 +6,10 @@ import { signOut } from "next-auth/react";
 
 const links = [
   { href: "/admin/agenda", label: "Agenda" },
+  { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/servicios", label: "Servicios" },
   { href: "/admin/horarios", label: "Horarios" },
+  { href: "/admin/estadisticas", label: "Estadísticas" },
 ];
 
 export function AdminNav() {

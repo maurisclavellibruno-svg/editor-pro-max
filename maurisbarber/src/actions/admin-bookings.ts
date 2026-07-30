@@ -6,6 +6,7 @@ import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasBookingConflict } from "@/lib/availability";
+import { notifications } from "@/lib/notifications";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -93,7 +94,23 @@ const statusSchema = z.object({
 export async function updateBookingStatus(input: unknown) {
   await requireAdmin();
   const data = statusSchema.parse(input);
-  await prisma.booking.update({ where: { id: data.bookingId }, data: { status: data.status } });
+  const booking = await prisma.booking.update({
+    where: { id: data.bookingId },
+    data: { status: data.status },
+    include: { customer: true, service: true },
+  });
+
+  if (data.status === "CANCELLED") {
+    await notifications.notifyCancellation({
+      customerName: `${booking.customer.firstName} ${booking.customer.lastName}`,
+      customerPhone: booking.customer.phone,
+      customerEmail: booking.customer.email,
+      serviceName: booking.service.name,
+      startAt: booking.startAt,
+      price: Number(booking.price),
+    });
+  }
+
   revalidatePath("/admin/agenda");
 }
 

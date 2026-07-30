@@ -15,6 +15,8 @@ export interface BookingNotificationPayload {
 interface NotificationProvider {
   notifyAdminNewBooking(payload: BookingNotificationPayload): Promise<void>;
   notifyCustomerConfirmation(payload: BookingNotificationPayload): Promise<void>;
+  notifyCustomerReminder(payload: BookingNotificationPayload): Promise<void>;
+  notifyCancellation(payload: BookingNotificationPayload): Promise<void>;
 }
 
 class EmailNotificationProvider implements NotificationProvider {
@@ -40,6 +42,22 @@ class EmailNotificationProvider implements NotificationProvider {
     const subject = `Confirmación de tu turno en MaurisBarber`;
     const body = formatBody(payload);
     await this.send(payload.customerEmail, subject, body);
+  }
+
+  async notifyCustomerReminder(payload: BookingNotificationPayload): Promise<void> {
+    if (!payload.customerEmail) return;
+    const subject = `Recordatorio: tu turno en MaurisBarber es pronto`;
+    const body = formatBody(payload);
+    await this.send(payload.customerEmail, subject, body);
+  }
+
+  async notifyCancellation(payload: BookingNotificationPayload): Promise<void> {
+    const subject = `Turno cancelado: ${payload.customerName} — ${payload.serviceName}`;
+    const body = formatBody(payload);
+    await this.send(process.env.NOTIFICATION_EMAIL, subject, body);
+    if (payload.customerEmail) {
+      await this.send(payload.customerEmail, "Tu turno en MaurisBarber fue cancelado", body);
+    }
   }
 
   private async send(to: string | undefined, subject: string, text: string) {

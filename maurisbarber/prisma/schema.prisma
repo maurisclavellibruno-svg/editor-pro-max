@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  employee     Employee?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Business configuration
+// ---------------------------------------------------------------------------
+
+// Singleton row with the shop's public info. Modeled as a table (not env vars)
+// so the admin panel can edit it without touching code. A future multi-location
+// version would add a Location model and move these fields there.
+model Barbershop {
+  id              String   @id @default(cuid())
+  name            String   @default("MaurisBarber")
+  phone           String
+  whatsappNumber  String
+  instagramHandle String
+  address         String
+  mapsEmbedUrl    String
+  description     String   @default("")
+  updatedAt       DateTime @updatedAt
+}
+
+// One row per barber. v1 has a single active employee (Mauris) but bookings
+// already reference an employeeId so a second barber can be added later
+// without a schema migration touching Booking.
+model Employee {
+  id        String    @id @default(cuid())
+  name      String
+  active    Boolean   @default(true)
+  userId    String?   @unique
+  user      User?     @relation(fields: [userId], references: [id])
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+}
+
+enum SchedulingMode {
+  CONSECUTIVE // slots every `duration` minutes
+  CUSTOM_FREQUENCY // slots every `frequencyMinutes`
+  MANUAL // exactly the times listed in `manualSlots`
+}
+
+model Service {
+  id          String         @id @default(cuid())
+  name        String
+  description String         @default("")
+  price       Decimal        @db.Decimal(10, 2)
+  duration    Int // minutes
+  color       String         @default("#16a34a")
+  imageUrl    String?
+  active      Boolean        @default(true)
+
+  schedulingMode   SchedulingMode @default(CONSECUTIVE)
+  frequencyMinutes Int? // used when schedulingMode = CUSTOM_FREQUENCY
+  manualSlots      String[] // "HH:mm" entries, used when schedulingMode = MANUAL
+
+  // If true, bookings of this service do NOT block the barber's availability
+  // for other bookings during their time span (e.g. hair color processing).
+  allowsParallel Boolean @default(false)
+
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model BusinessHours {
+  id        String  @id @default(cuid())
+  dayOfWeek Int // 0 = Sunday ... 6 = Saturday
+  openTime  String // "HH:mm"
+  closeTime String // "HH:mm"
+  isClosed  Boolean @default(false)
+
+  @@unique([dayOfWeek])
+}
+
+model BreakTime {
+  id        String @id @default(cuid())
+  dayOfWeek Int // 0 = Sunday ... 6 = Saturday
+  startTime String // "HH:mm"
+  endTime   String // "HH:mm"
+  label     String @default("Descanso")
+}
+
+enum BlockedDateType {
+  HOLIDAY
+  VACATION
+  MANUAL_BLOCK
+}
+
+model BlockedDate {
+  id        String          @id @default(cuid())
+  startDate DateTime
+  endDate   DateTime
+  reason    String
+  type      BlockedDateType @default(MANUAL_BLOCK)
+  createdAt DateTime        @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// CRM
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id        String    @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String
+  email     String?
+  instagram String?
+  birthDate DateTime?
+
+  // Free-form private notes in v1 (favorite cut, how they like their beard,
+  // music, preferences, etc). Structured fields land in the CRM phase.
+  notes String @default("")
+
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([phone])
+}
+
+// ---------------------------------------------------------------------------
+// Bookings — the historical record. Rows are never deleted, only their
+// status changes (CANCELLED, NO_SHOW, etc.) so history stays complete.
+// ---------------------------------------------------------------------------
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  MERCADO_PAGO
+  DEBIT
+  CREDIT
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+
+  startAt DateTime
+  endAt   DateTime
+
+  // Snapshot of the service price at booking time, so later price changes
+  // don't rewrite history.
+  price Decimal @db.Decimal(10, 2)
+
+  status        BookingStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(UNPAID)
+  paymentMethod PaymentMethod?
+
+  notes String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([employeeId, startAt, endAt])
+  @@index([customerId])
+}

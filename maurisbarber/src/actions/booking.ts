@@ -7,6 +7,7 @@ import { notifications } from "@/lib/notifications";
 import { createBookingSchema } from "@/schemas/booking";
 import { dateWithMinutes, timeToMinutes } from "@/lib/time";
 import { isRateLimited } from "@/lib/rate-limit";
+import { syncBookingBestEffort } from "@/lib/calendar-sync";
 
 export interface CreateBookingResult {
   ok: boolean;
@@ -93,6 +94,7 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
   };
   await notifications.notifyAdminNewBooking(payload);
   await notifications.notifyCustomerConfirmation(payload);
+  await syncBookingBestEffort(`${service.name} — ${payload.customerName}`, `Tel: ${data.phone}`, startAt, endAt);
 
   return { ok: true, bookingId: booking.id };
 }

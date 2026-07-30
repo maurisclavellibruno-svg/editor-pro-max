@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { hasBookingConflict } from "@/lib/availability";
 import { notifications } from "@/lib/notifications";
 import { awardPointsForBooking } from "@/lib/loyalty";
+import { syncBookingBestEffort } from "@/lib/calendar-sync";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -61,6 +62,13 @@ export async function createManualBooking(input: unknown) {
       notes: data.notes,
     },
   });
+
+  await syncBookingBestEffort(
+    `${service.name} — ${data.firstName} ${data.lastName}`,
+    `Tel: ${data.phone}${data.notes ? `\n${data.notes}` : ""}`,
+    startAt,
+    endAt,
+  );
 
   revalidatePath("/admin/agenda");
 }

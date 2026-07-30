@@ -81,6 +81,14 @@ Cada `Employee` puede tener su propio login (`/admin/empleados` → "Dar acceso 
 - **Gift cards**: se emiten con un código único (`/admin/giftcards`) y se pueden usar como método de pago de un turno (descuentan del saldo; el saldo sobrante queda disponible para el futuro).
 - **Puntos de fidelización**: se acreditan automáticamente (1 punto cada $100) al marcar un turno como pagado, sin importar el método de pago. Se canjean manualmente desde la ficha del cliente — el sistema no impone qué se obtiene a cambio, eso lo decide el barbero en el mostrador.
 
+## Integraciones externas
+
+Código real contra la API de cada proveedor (no mocks), pero **ninguna fue probada contra credenciales reales** — no tengo cuentas de Mercado Pago/Stripe/Meta/Google para verificarlas end-to-end. Probalas en modo sandbox/test antes de usarlas en producción. Todas son estrictamente opcionales: sin las variables de entorno correspondientes, el resto de la app funciona exactamente igual.
+
+- **Mercado Pago y Stripe** (`src/lib/integrations/mercadopago.ts`, `stripe.ts`): generan un link de pago (Checkout Pro / Checkout Session) para un turno puntual. El botón "Link de pago" aparece en el detalle de cada turno impago en la agenda. Configurá `MERCADOPAGO_ACCESS_TOKEN` y/o `STRIPE_SECRET_KEY`. Cuando el cliente paga, marcá el turno como pagado manualmente (método Débito/Crédito/Mercado Pago) — no hay webhook automático de confirmación en v1.
+- **WhatsApp Business (Meta Cloud API)** (`src/lib/integrations/whatsapp.ts`): expone `sendWhatsAppText` y `sendWhatsAppTemplate`, pero **no está conectado a los recordatorios automáticos**. Motivo: Meta solo permite mensajes de texto libre dentro de una ventana de 24hs desde que el cliente escribió por última vez; un recordatorio programado (business-initiated) casi siempre cae fuera de esa ventana y requiere un *message template* pre-aprobado en Meta Business Manager. Configurá `WHATSAPP_ACCESS_TOKEN`/`WHATSAPP_PHONE_NUMBER_ID`, creá tu template, y llamá `sendWhatsAppTemplate` desde `src/lib/reminders.ts` cuando lo tengas.
+- **Google Calendar** (`src/lib/integrations/google-calendar.ts`): sincroniza cada turno nuevo (reserva pública o manual) como evento en un calendario de Google, best-effort — si falla, solo queda un log, nunca bloquea la reserva. Necesita `GOOGLE_CALENDAR_CLIENT_ID/SECRET/REFRESH_TOKEN/CALENDAR_ID` (ver comentarios en el archivo para cómo generarlos).
+
 ## Estado del proyecto
 
 **Implementado:**
@@ -91,5 +99,6 @@ Cada `Employee` puede tener su propio login (`/admin/empleados` → "Dar acceso 
 - Dashboard de estadísticas y finanzas: ingresos (turnos + productos), egresos, ocupación, ranking de clientes, exportación a Excel y PDF.
 - Recordatorios automáticos por email y avisos de cancelación.
 - PWA instalable, Docker para desarrollo y producción, backups, hardening de seguridad básico.
+- Integraciones externas listas para activar (Mercado Pago, Stripe, WhatsApp, Google Calendar) — ver sección arriba.
 
-**Preparado para escalar (arquitectura, no implementado todavía):** múltiples sucursales, Mercado Pago/Stripe, WhatsApp Business API, integración con Google Calendar — ver sección siguiente.
+**Preparado para escalar (arquitectura, no implementado todavía):** múltiples sucursales.

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { payWithGiftCard, payWithMembershipCredit, updateBookingPayment, updateBookingStatus } from "@/actions/admin-bookings";
+import { generatePaymentLink } from "@/actions/payments";
 
 export interface BookingEventProps {
   id: string;
@@ -58,6 +59,7 @@ export function BookingDetailModal({
   );
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [giftCardCode, setGiftCardCode] = useState("");
+  const [paymentLink, setPaymentLink] = useState<string | null>(null);
 
   useEffect(() => {
     if (booking.paymentStatus === "PAID") return;
@@ -102,6 +104,20 @@ export function BookingDetailModal({
       onChanged();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo cobrar con la gift card");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function generateLink(provider: "mercadopago" | "stripe") {
+    setLoading(true);
+    setError(null);
+    setPaymentLink(null);
+    try {
+      const url = await generatePaymentLink(booking.id, provider);
+      setPaymentLink(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo generar el link de pago");
     } finally {
       setLoading(false);
     }
@@ -209,6 +225,32 @@ export function BookingDetailModal({
                   Pagar con gift card
                 </Button>
               </div>
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="flex-1"
+                  disabled={loading}
+                  onClick={() => generateLink("mercadopago")}
+                >
+                  Link de pago (Mercado Pago)
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="flex-1"
+                  disabled={loading}
+                  onClick={() => generateLink("stripe")}
+                >
+                  Link de pago (Stripe)
+                </Button>
+              </div>
+              {paymentLink && (
+                <p className="break-all rounded-xl bg-surface-alt px-3 py-2 text-xs text-ink-soft">
+                  {paymentLink}
+                </p>
+              )}
 
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>

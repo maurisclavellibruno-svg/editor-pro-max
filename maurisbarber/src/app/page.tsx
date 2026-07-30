@@ -1,4 +1,8 @@
 import { Hero } from "@/components/landing/Hero";
+import { TrustBadges } from "@/components/landing/TrustBadges";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ResultsGallery } from "@/components/landing/ResultsGallery";
+import { AboutMe } from "@/components/landing/AboutMe";
 import { ServicesPreview } from "@/components/landing/ServicesPreview";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { HoursAndContact } from "@/components/landing/HoursAndContact";
@@ -18,7 +22,11 @@ export default async function LandingPage() {
 
   return (
     <main>
-      <Hero name={shop.name} instagramHandle={shop.instagramHandle} />
+      <Hero name={shop.name} instagramHandle={shop.instagramHandle} whatsappNumber={shop.whatsappNumber} />
+      <TrustBadges />
+      <HowItWorks />
+      <ResultsGallery />
+      <AboutMe />
       <ServicesPreview
         services={services.map((s) => ({
           id: s.id,

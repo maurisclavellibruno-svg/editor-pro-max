@@ -15,8 +15,8 @@ export function ServicesPreview({ services }: { services: Service[] }) {
     <Section
       id="servicios"
       eyebrow="Servicios"
-      title="Elegí tu estilo"
-      subtitle="Servicios pensados para cada ocasión, con la calidad y atención que merecés."
+      title="Cada asesoría termina en uno de estos"
+      subtitle="El punto de partida es siempre el mismo: entender tu rostro y tu estilo antes de tocar la tijera."
     >
       <div className="grid gap-4 sm:grid-cols-2">
         {services.map((service) => (
@@ -43,7 +43,7 @@ export function ServicesPreview({ services }: { services: Service[] }) {
       </div>
       <div className="mt-10 text-center">
         <ButtonLink href="/reservar" variant="accent" size="lg">
-          Reservar turno
+          Reservar mi asesoría
         </ButtonLink>
       </div>
     </Section>

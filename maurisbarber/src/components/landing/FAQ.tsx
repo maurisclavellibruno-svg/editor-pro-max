@@ -5,8 +5,12 @@ import { Section } from "@/components/ui/Section";
 
 const faqs = [
   {
-    q: "¿Cómo reservo un turno?",
-    a: "Tocá el botón \"Reservar turno\", elegí el servicio, el día y el horario que prefieras, dejá tus datos de contacto y listo.",
+    q: "¿En qué consiste la asesoría?",
+    a: "Antes de cortar, analizamos la forma de tu rostro, tus facciones, tu estilo de vida y lo que querés transmitir, para recomendarte el corte que realmente te favorece — no uno al azar.",
+  },
+  {
+    q: "¿Cómo reservo mi asesoría?",
+    a: "Tocá el botón \"Reservar mi asesoría\", elegí el servicio, el día y el horario que prefieras, dejá tus datos de contacto y listo.",
   },
   {
     q: "¿Necesito pagar por adelantado?",

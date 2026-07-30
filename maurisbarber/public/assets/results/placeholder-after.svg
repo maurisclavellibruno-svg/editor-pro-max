@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000">
+  <rect width="800" height="1000" fill="#111111"/>
+  <text x="400" y="500" text-anchor="middle" font-family="system-ui, sans-serif" font-size="32" fill="#e5e5e5">Foto "después"</text>
+  <text x="400" y="545" text-anchor="middle" font-family="system-ui, sans-serif" font-size="20" fill="#8a8a8a">próximamente</text>
+</svg>

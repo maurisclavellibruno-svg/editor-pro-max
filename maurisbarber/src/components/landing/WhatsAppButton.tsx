@@ -1,7 +1,7 @@
+import { whatsappHref } from "@/lib/whatsapp";
+
 export function WhatsAppButton({ whatsappNumber }: { whatsappNumber: string }) {
-  const href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-    "Hola! Quiero consultar sobre un turno en MaurisBarber.",
-  )}`;
+  const href = whatsappHref(whatsappNumber, "Hola, quiero agendar una asesoría personalizada.");
 
   return (
     <a

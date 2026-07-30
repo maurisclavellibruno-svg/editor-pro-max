@@ -1,18 +1,19 @@
 import { Section } from "@/components/ui/Section";
 
+// Placeholder testimonials centered on the consultation, not just the cut —
+// reemplazar por reseñas reales de clientes cuando estén disponibles.
 const testimonials = [
   {
     name: "Federico G.",
-    quote:
-      "El mejor corte que me hice en Montevideo. Atención impecable y ambiente muy prolijo.",
+    quote: "Nunca nadie me había explicado qué corte realmente me favorecía.",
   },
   {
     name: "Rodrigo M.",
-    quote: "Reservar el turno fue súper rápido desde el celular. Y el resultado, diez puntos.",
+    quote: "Entendí qué estilos funcionan con mi rostro y ahora sé qué pedir.",
   },
   {
     name: "Bruno L.",
-    quote: "Mauris es un capo, siempre atento a los detalles. Ya es mi barbero de cabecera.",
+    quote: "La asesoría hizo toda la diferencia. Ya es mi barbero de cabecera.",
   },
 ];
 

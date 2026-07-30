@@ -15,6 +15,11 @@ import {Testimonial} from "./templates/content/Testimonial";
 // Promo templates
 import {Announcement} from "./templates/promo/Announcement";
 import {BeforeAfterDemo} from "./compositions/BeforeAfterDemo";
+import {AnnouncementParticles} from "./compositions/AnnouncementParticles";
+
+// Custom compositions
+import {CourseAnnouncementTikTok} from "./compositions/CourseAnnouncementTikTok";
+import {AIPresentation} from "./compositions/AIPresentation";
 
 // Editing templates
 import {TalkingHeadEdit} from "./templates/editing/TalkingHeadEdit";
@@ -47,6 +52,14 @@ export const RemotionRoot: React.FC = () => {
             body: "AI can edit videos now using just code.",
             cta: "Follow for more",
           }}
+        />
+        <Composition
+          id="CourseAnnouncementTikTok"
+          component={CourseAnnouncementTikTok}
+          durationInFrames={270}
+          fps={30}
+          width={1080}
+          height={1920}
         />
         <Composition
           id="InstagramReel"
@@ -92,6 +105,14 @@ export const RemotionRoot: React.FC = () => {
           }}
         />
         <Composition
+          id="AIPresentation"
+          component={AIPresentation}
+          durationInFrames={750}
+          fps={30}
+          width={1920}
+          height={1080}
+        />
+        <Composition
           id="Testimonial"
           component={Testimonial}
           durationInFrames={180}
@@ -126,6 +147,14 @@ export const RemotionRoot: React.FC = () => {
           id="BeforeAfter"
           component={BeforeAfterDemo}
           durationInFrames={180}
+          fps={30}
+          width={1920}
+          height={1080}
+        />
+        <Composition
+          id="AnnouncementParticles"
+          component={AnnouncementParticles}
+          durationInFrames={300}
           fps={30}
           width={1920}
           height={1080}

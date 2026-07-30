@@ -1,4 +1,10 @@
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
+# Debian slim instead of Alpine: Prisma's musl query engine needs OpenSSL 1.1,
+# which recent Alpine releases no longer ship, causing
+# "Error loading shared library libssl.so.1.1" at runtime. Debian avoids that
+# whole class of issues.
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 FROM base AS deps
 WORKDIR /app

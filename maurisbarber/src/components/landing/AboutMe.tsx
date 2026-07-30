@@ -2,9 +2,7 @@ import Image from "next/image";
 import { Section } from "@/components/ui/Section";
 import { ButtonLink } from "@/components/ui/Button";
 
-// Swap for the real photo: drop it in public/assets/ and set
-// hasPhoto = true with the right src below.
-const hasPhoto = false;
+const hasPhoto = true;
 const photoSrc = "/assets/mauris.jpg";
 
 export function AboutMe() {

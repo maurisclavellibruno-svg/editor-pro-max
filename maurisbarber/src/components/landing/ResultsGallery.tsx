@@ -1,13 +1,12 @@
 import { Section } from "@/components/ui/Section";
 import { BeforeAfterSlider } from "@/components/landing/BeforeAfterSlider";
 
-// Swap these paths for real client photos (drop the files in
-// public/assets/results/ and update the entries below — before/after pairs
-// keep the placeholder graphic until then).
+// Add more pairs here as new client photos come in — drop them in
+// public/assets/results/ and push a new entry.
 const results = [
   {
-    before: "/assets/results/placeholder-before.svg",
-    after: "/assets/results/placeholder-after.svg",
+    before: "/assets/results/cliente-1-antes.jpg",
+    after: "/assets/results/cliente-1-despues.jpg",
     alt: "Resultado de asesoría de estilo",
   },
 ];

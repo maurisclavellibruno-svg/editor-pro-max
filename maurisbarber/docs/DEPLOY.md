@@ -68,25 +68,28 @@ cp .env.example .env
 nano .env
 ```
 
-Completá al menos esto:
+Completá al menos esto. **Importante: sin comillas en los valores** — a
+diferencia de Next.js en desarrollo, `docker run --env-file` no las saca, y
+terminan siendo parte literal del valor (Prisma rechaza la URL con un error
+confuso si eso pasa):
 
 ```bash
-DATABASE_URL="postgresql://maurisbarber:maurisbarber@localhost:5432/maurisbarber?schema=public"
+DATABASE_URL=postgresql://maurisbarber:maurisbarber@localhost:5432/maurisbarber?schema=public
 
-NEXTAUTH_URL="https://maurisbarber.com"        # tu dominio real, con https
-NEXTAUTH_SECRET="…"                              # generar con: openssl rand -base64 32
+NEXTAUTH_URL=https://maurisbarber.com          # tu dominio real, con https
+NEXTAUTH_SECRET=…                                # generar con: openssl rand -base64 32
 
-ADMIN_EMAIL="mauris@maurisbarber.com"
-ADMIN_PASSWORD="…"                               # contraseña real y fuerte, no la de ejemplo
+ADMIN_EMAIL=mauris@maurisbarber.com
+ADMIN_PASSWORD=…                                 # contraseña real y fuerte, no la de ejemplo
 
-SMTP_HOST="smtp.resend.com"
-SMTP_PORT="587"
-SMTP_USER="resend"
-SMTP_PASSWORD="re_tu_api_key"
-SMTP_FROM_EMAIL="no-reply@maurisbarber.com"       # o "onboarding@resend.dev" si todavía no verificaste el dominio
-NOTIFICATION_EMAIL="mauris@maurisbarber.com"      # a dónde te llegan los avisos de nuevas reservas
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=587
+SMTP_USER=resend
+SMTP_PASSWORD=re_tu_api_key
+SMTP_FROM_EMAIL=no-reply@maurisbarber.com         # o onboarding@resend.dev si todavía no verificaste el dominio
+NOTIFICATION_EMAIL=mauris@maurisbarber.com        # a dónde te llegan los avisos de nuevas reservas
 
-NEXT_PUBLIC_WHATSAPP_NUMBER="59891552626"
+NEXT_PUBLIC_WHATSAPP_NUMBER=59891552626
 ```
 
 El resto de las variables (recordatorios, integraciones opcionales) podés

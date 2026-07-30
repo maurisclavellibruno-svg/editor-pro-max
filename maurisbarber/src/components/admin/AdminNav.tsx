@@ -9,6 +9,8 @@ const links = [
   { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/servicios", label: "Servicios" },
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/membresias", label: "Membresías" },
+  { href: "/admin/giftcards", label: "Gift cards" },
   { href: "/admin/empleados", label: "Empleados" },
   { href: "/admin/horarios", label: "Horarios" },
   { href: "/admin/estadisticas", label: "Estadísticas" },
@@ -19,9 +21,9 @@ export function AdminNav() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/80 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-y-2 px-6 py-4">
         <span className="font-semibold text-ink">MaurisBarber · Admin</span>
-        <nav className="flex items-center gap-1">
+        <nav className="flex flex-wrap items-center gap-1">
           {links.map((link) => (
             <Link
               key={link.href}

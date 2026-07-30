@@ -64,6 +64,11 @@ export async function getCustomerDetail(customerId: string) {
         orderBy: { startAt: "desc" },
         include: { service: true },
       },
+      memberships: {
+        where: { remainingCredits: { gt: 0 }, expiresAt: { gt: new Date() } },
+        include: { plan: true },
+      },
+      giftCards: { where: { active: true, remainingAmount: { gt: 0 } } },
     },
   });
   if (!customer) return null;

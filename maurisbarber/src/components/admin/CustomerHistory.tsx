@@ -13,6 +13,8 @@ const PAYMENT_LABELS: Record<string, string> = {
   MERCADO_PAGO: "Mercado Pago",
   DEBIT: "Débito",
   CREDIT: "Crédito",
+  MEMBERSHIP_CREDIT: "Crédito de membresía",
+  GIFT_CARD: "Gift card",
 };
 
 export function CustomerHistory({ bookings }: { bookings: HistoryEntry[] }) {

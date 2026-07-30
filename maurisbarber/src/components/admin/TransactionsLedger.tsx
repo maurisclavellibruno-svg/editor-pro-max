@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { createTransaction, deleteTransaction } from "@/actions/transactions";
 
-type PaymentMethod = "CASH" | "TRANSFER" | "MERCADO_PAGO" | "DEBIT" | "CREDIT";
+type ManualEntryMethod = "CASH" | "TRANSFER" | "MERCADO_PAGO" | "DEBIT" | "CREDIT";
+type PaymentMethod = ManualEntryMethod | "MEMBERSHIP_CREDIT" | "GIFT_CARD";
 
 interface Transaction {
   id: string;
@@ -15,7 +16,7 @@ interface Transaction {
   date: string;
 }
 
-const METHOD_LABELS: Record<PaymentMethod, string> = {
+const MANUAL_ENTRY_METHOD_LABELS: Record<ManualEntryMethod, string> = {
   CASH: "Efectivo",
   TRANSFER: "Transferencia",
   MERCADO_PAGO: "Mercado Pago",
@@ -23,12 +24,22 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
   CREDIT: "Crédito",
 };
 
+// Manual entries only ever use the methods above — membership credits and
+// gift cards are booking-specific payment flows recorded elsewhere — but
+// this covers every PaymentMethod value in case one ever shows up here
+// (e.g. edited directly in the database), for display purposes only.
+const METHOD_LABELS: Record<PaymentMethod, string> = {
+  ...MANUAL_ENTRY_METHOD_LABELS,
+  MEMBERSHIP_CREDIT: "Crédito de membresía",
+  GIFT_CARD: "Gift card",
+};
+
 export function TransactionsLedger({ transactions }: { transactions: Transaction[] }) {
   const [list, setList] = useState(transactions);
   const [form, setForm] = useState({
     type: "EXPENSE" as "INCOME" | "EXPENSE",
     amount: "",
-    method: "CASH" as PaymentMethod,
+    method: "CASH" as ManualEntryMethod,
     description: "",
     date: new Date().toISOString().slice(0, 10),
   });
@@ -90,10 +101,10 @@ export function TransactionsLedger({ transactions }: { transactions: Transaction
         />
         <select
           value={form.method}
-          onChange={(e) => setForm({ ...form, method: e.target.value as PaymentMethod })}
+          onChange={(e) => setForm({ ...form, method: e.target.value as ManualEntryMethod })}
           className="rounded-xl border border-line px-3 py-2 text-sm"
         >
-          {Object.entries(METHOD_LABELS).map(([value, label]) => (
+          {Object.entries(MANUAL_ENTRY_METHOD_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { updateBookingPayment, updateBookingStatus } from "@/actions/admin-bookings";
+import { payWithGiftCard, payWithMembershipCredit, updateBookingPayment, updateBookingStatus } from "@/actions/admin-bookings";
 
 export interface BookingEventProps {
   id: string;
@@ -10,12 +10,18 @@ export interface BookingEventProps {
   end: Date;
   status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW";
   paymentStatus: "UNPAID" | "PAID";
-  paymentMethod: "CASH" | "TRANSFER" | "MERCADO_PAGO" | "DEBIT" | "CREDIT" | null;
+  paymentMethod: "CASH" | "TRANSFER" | "MERCADO_PAGO" | "DEBIT" | "CREDIT" | "MEMBERSHIP_CREDIT" | "GIFT_CARD" | null;
   serviceName: string;
   price: number;
   customerName: string;
   customerPhone: string;
   notes: string;
+}
+
+interface Membership {
+  id: string;
+  planName: string;
+  remainingCredits: number;
 }
 
 const STATUS_LABELS: Record<BookingEventProps["status"], string> = {
@@ -32,6 +38,8 @@ const PAYMENT_METHOD_LABELS: Record<NonNullable<BookingEventProps["paymentMethod
   MERCADO_PAGO: "Mercado Pago",
   DEBIT: "Débito",
   CREDIT: "Crédito",
+  MEMBERSHIP_CREDIT: "Crédito de membresía",
+  GIFT_CARD: "Gift card",
 };
 
 export function BookingDetailModal({
@@ -44,7 +52,20 @@ export function BookingDetailModal({
   onChanged: () => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(booking.paymentMethod ?? "CASH");
+  const [error, setError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"CASH" | "TRANSFER" | "MERCADO_PAGO" | "DEBIT" | "CREDIT">(
+    "CASH",
+  );
+  const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [giftCardCode, setGiftCardCode] = useState("");
+
+  useEffect(() => {
+    if (booking.paymentStatus === "PAID") return;
+    fetch(`/api/admin/customer-memberships?phone=${encodeURIComponent(booking.customerPhone)}`)
+      .then((res) => res.json())
+      .then((data) => setMemberships(data.memberships ?? []))
+      .catch(() => setMemberships([]));
+  }, [booking.customerPhone, booking.paymentStatus]);
 
   async function setStatus(status: BookingEventProps["status"]) {
     setLoading(true);
@@ -58,6 +79,32 @@ export function BookingDetailModal({
     await updateBookingPayment({ bookingId: booking.id, paymentStatus: "PAID", paymentMethod });
     setLoading(false);
     onChanged();
+  }
+
+  async function payMembershipCredit(membershipId: string) {
+    setLoading(true);
+    setError(null);
+    try {
+      await payWithMembershipCredit({ bookingId: booking.id, customerMembershipId: membershipId });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo cobrar con la membresía");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function payGiftCard() {
+    setLoading(true);
+    setError(null);
+    try {
+      await payWithGiftCard({ bookingId: booking.id, code: giftCardCode });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo cobrar con la gift card");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -115,23 +162,55 @@ export function BookingDetailModal({
         <div className="mt-5 border-t border-line pt-4">
           <p className="mb-2 text-sm font-semibold text-ink">Pago</p>
           {booking.paymentStatus === "PAID" ? (
-            <p className="text-sm text-accent">Pagado</p>
+            <p className="text-sm text-accent">
+              Pagado{booking.paymentMethod ? ` · ${PAYMENT_METHOD_LABELS[booking.paymentMethod]}` : ""}
+            </p>
           ) : (
-            <div className="flex items-center gap-2">
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value as typeof paymentMethod)}
-                className="rounded-xl border border-line px-3 py-2 text-sm"
-              >
-                {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <Button size="sm" variant="accent" disabled={loading} onClick={markPaid}>
-                Marcar pagado
-              </Button>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value as typeof paymentMethod)}
+                  className="rounded-xl border border-line px-3 py-2 text-sm"
+                >
+                  <option value="CASH">Efectivo</option>
+                  <option value="TRANSFER">Transferencia</option>
+                  <option value="MERCADO_PAGO">Mercado Pago</option>
+                  <option value="DEBIT">Débito</option>
+                  <option value="CREDIT">Crédito</option>
+                </select>
+                <Button size="sm" variant="accent" disabled={loading} onClick={markPaid}>
+                  Marcar pagado
+                </Button>
+              </div>
+
+              {memberships.map((m) => (
+                <Button
+                  key={m.id}
+                  size="sm"
+                  variant="outline"
+                  className="w-full"
+                  disabled={loading}
+                  onClick={() => payMembershipCredit(m.id)}
+                >
+                  Usar crédito de {m.planName} (quedan {m.remainingCredits})
+                </Button>
+              ))}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Código de gift card"
+                  value={giftCardCode}
+                  onChange={(e) => setGiftCardCode(e.target.value)}
+                  className="w-full rounded-xl border border-line px-3 py-2 text-sm"
+                />
+                <Button size="sm" variant="outline" disabled={loading || !giftCardCode} onClick={payGiftCard}>
+                  Pagar con gift card
+                </Button>
+              </div>
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
           )}
         </div>

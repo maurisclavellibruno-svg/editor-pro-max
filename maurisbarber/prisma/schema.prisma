@@ -60,14 +60,14 @@ enum SchedulingMode {
 }
 
 model Service {
-  id          String         @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  description String         @default("")
-  price       Decimal        @db.Decimal(10, 2)
+  description String  @default("")
+  price       Decimal @db.Decimal(10, 2)
   duration    Int // minutes
-  color       String         @default("#16a34a")
+  color       String  @default("#16a34a")
   imageUrl    String?
-  active      Boolean        @default(true)
+  active      Boolean @default(true)
 
   schedulingMode   SchedulingMode @default(CONSECUTIVE)
   frequencyMinutes Int? // used when schedulingMode = CUSTOM_FREQUENCY
@@ -130,24 +130,30 @@ model Customer {
 
   // Structured private notes, so the barber recognizes the client better
   // every time they come back.
-  favoriteCut         String?
-  beardPreference     String?
-  musicPreference     String?
-  likesToTalk         Boolean?
-  productsUsed        String?
-  hairColor           String?
-  generalPreferences  String?
-  likedNotes          String?
-  dislikedNotes       String?
+  favoriteCut        String?
+  beardPreference    String?
+  musicPreference    String?
+  likesToTalk        Boolean?
+  productsUsed       String?
+  hairColor          String?
+  generalPreferences String?
+  likedNotes         String?
+  dislikedNotes      String?
 
   // Free-form catch-all for anything that doesn't fit the fields above.
   notes String @default("")
 
+  // Loyalty program: accrued automatically when a booking is paid (see
+  // POINTS_PER_100 in lib/loyalty.ts), redeemed manually by staff.
+  loyaltyPoints Int @default(0)
+
   bookings     Booking[]
   photos       CustomerPhoto[]
   productSales ProductSale[]
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  memberships  CustomerMembership[]
+  giftCards    GiftCard[]
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 
   @@unique([phone])
 }
@@ -185,6 +191,8 @@ enum PaymentMethod {
   MERCADO_PAGO
   DEBIT
   CREDIT
+  MEMBERSHIP_CREDIT
+  GIFT_CARD
 }
 
 model Booking {
@@ -203,8 +211,8 @@ model Booking {
   // don't rewrite history.
   price Decimal @db.Decimal(10, 2)
 
-  status        BookingStatus @default(PENDING)
-  paymentStatus PaymentStatus @default(UNPAID)
+  status        BookingStatus  @default(PENDING)
+  paymentStatus PaymentStatus  @default(UNPAID)
   paymentMethod PaymentMethod?
 
   notes String @default("")
@@ -212,6 +220,10 @@ model Booking {
   // Set once a reminder email has been sent, so the reminder scan never
   // sends the same booking twice.
   reminderSentAt DateTime?
+
+  // Set once loyalty points have been credited for this booking's payment,
+  // so toggling paymentStatus back and forth never awards points twice.
+  pointsAwarded Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -250,12 +262,12 @@ model Transaction {
 // ---------------------------------------------------------------------------
 
 model Product {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  description String   @default("")
-  price       Decimal  @db.Decimal(10, 2)
+  description String  @default("")
+  price       Decimal @db.Decimal(10, 2)
   imageUrl    String?
-  active      Boolean  @default(true)
+  active      Boolean @default(true)
   // Null means stock isn't tracked for this product.
   stock       Int?
 
@@ -265,12 +277,12 @@ model Product {
 }
 
 model ProductSale {
-  id         String   @id @default(cuid())
-  productId  String
-  product    Product  @relation(fields: [productId], references: [id])
-  customerId String?
-  customer   Customer? @relation(fields: [customerId], references: [id])
-  quantity   Int
+  id            String         @id @default(cuid())
+  productId     String
+  product       Product        @relation(fields: [productId], references: [id])
+  customerId    String?
+  customer      Customer?      @relation(fields: [customerId], references: [id])
+  quantity      Int
   // Snapshot of the unit price at sale time.
   unitPrice     Decimal        @db.Decimal(10, 2)
   paymentMethod PaymentMethod?
@@ -278,4 +290,48 @@ model ProductSale {
   createdAt     DateTime       @default(now())
 
   @@index([date])
+}
+
+// ---------------------------------------------------------------------------
+// Loyalty program — prepaid membership packages and gift cards. Both act as
+// alternate ways to pay for a Booking (see PaymentMethod.MEMBERSHIP_CREDIT /
+// GIFT_CARD) without a real-time monetary transaction, since the value was
+// already collected when the plan/card was sold.
+// ---------------------------------------------------------------------------
+
+model MembershipPlan {
+  id           String               @id @default(cuid())
+  name         String
+  description  String               @default("")
+  price        Decimal              @db.Decimal(10, 2)
+  credits      Int // e.g. "4 cortes"
+  validityDays Int // credits expire this many days after purchase
+  active       Boolean              @default(true)
+  memberships  CustomerMembership[]
+  createdAt    DateTime             @default(now())
+}
+
+model CustomerMembership {
+  id               String         @id @default(cuid())
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id])
+  planId           String
+  plan             MembershipPlan @relation(fields: [planId], references: [id])
+  remainingCredits Int
+  purchasedAt      DateTime       @default(now())
+  expiresAt        DateTime
+
+  @@index([customerId])
+}
+
+model GiftCard {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  initialAmount   Decimal   @db.Decimal(10, 2)
+  remainingAmount Decimal   @db.Decimal(10, 2)
+  active          Boolean   @default(true)
+  expiresAt       DateTime?
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  createdAt       DateTime  @default(now())
 }

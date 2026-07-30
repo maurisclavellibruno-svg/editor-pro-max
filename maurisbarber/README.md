@@ -70,14 +70,26 @@ Un scheduler interno (`src/instrumentation.ts`) llama a `GET /api/cron/reminders
 
 La app es instalable (manifest + iconos + service worker mínimo). El service worker solo cachea una página de fallback offline — deliberadamente **no** cachea datos de disponibilidad, reservas ni el panel admin, para no mostrar información desactualizada sin conexión.
 
+## Multi-barbero
+
+Cada `Employee` puede tener su propio login (`/admin/empleados` → "Dar acceso al panel"). La reserva pública deja elegir barbero (o "cualquiera disponible", que asigna automáticamente al primero libre) y la agenda admin tiene un filtro por barbero. Todos los barberos comparten los mismos horarios/servicios del local en v1 — no hay agenda ni servicios por-barbero todavía.
+
+## Productos, membresías, puntos y gift cards
+
+- **Productos**: catálogo simple con stock opcional (`/admin/productos`), con un botón "Vender" que registra la venta y descuenta stock. Los ingresos por productos se suman a las estadísticas y a las exportaciones junto con los turnos.
+- **Membresías**: planes prepagos con créditos (`/admin/membresias`). Al vender una, el precio completo se registra como ingreso inmediato; cada turno pagado con un crédito no genera un ingreso adicional (ya estaba cobrado).
+- **Gift cards**: se emiten con un código único (`/admin/giftcards`) y se pueden usar como método de pago de un turno (descuentan del saldo; el saldo sobrante queda disponible para el futuro).
+- **Puntos de fidelización**: se acreditan automáticamente (1 punto cada $100) al marcar un turno como pagado, sin importar el método de pago. Se canjean manualmente desde la ficha del cliente — el sistema no impone qué se obtiene a cambio, eso lo decide el barbero en el mostrador.
+
 ## Estado del proyecto
 
 **Implementado:**
-- Landing page mobile-first con reservas online y motor de disponibilidad (turnos consecutivos, frecuencia personalizada, horarios manuales, trabajo en paralelo).
-- Panel admin: login, servicios, horarios/descansos/bloqueos, agenda tipo calendario (día/semana/mes) con drag&drop.
-- CRM de clientes: ficha con notas privadas estructuradas, fotos de referencia, historial completo.
-- Dashboard de estadísticas y finanzas: ingresos/egresos, ocupación, ranking de clientes, exportación a Excel y PDF.
+- Landing page mobile-first con reservas online y motor de disponibilidad (turnos consecutivos, frecuencia personalizada, horarios manuales, trabajo en paralelo, multi-barbero).
+- Panel admin: login, servicios, horarios/descansos/bloqueos, agenda tipo calendario (día/semana/mes) con drag&drop y filtro por barbero.
+- CRM de clientes: ficha con notas privadas estructuradas, fotos de referencia, historial completo, puntos de fidelización.
+- Productos, membresías y gift cards (ver sección arriba).
+- Dashboard de estadísticas y finanzas: ingresos (turnos + productos), egresos, ocupación, ranking de clientes, exportación a Excel y PDF.
 - Recordatorios automáticos por email y avisos de cancelación.
 - PWA instalable, Docker para desarrollo y producción, backups, hardening de seguridad básico.
 
-**Preparado para escalar (arquitectura, no implementado todavía):** múltiples barberos (`Employee` ya modelado), múltiples sucursales, venta de productos, membresías, gift cards, puntos, Mercado Pago/Stripe, WhatsApp Business API, integración con Google Calendar.
+**Preparado para escalar (arquitectura, no implementado todavía):** múltiples sucursales, Mercado Pago/Stripe, WhatsApp Business API, integración con Google Calendar — ver sección siguiente.

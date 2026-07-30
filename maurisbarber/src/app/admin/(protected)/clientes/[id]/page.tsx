@@ -4,6 +4,7 @@ import { CustomerInfoForm } from "@/components/admin/CustomerInfoForm";
 import { CustomerNotesForm } from "@/components/admin/CustomerNotesForm";
 import { CustomerPhotos } from "@/components/admin/CustomerPhotos";
 import { CustomerHistory } from "@/components/admin/CustomerHistory";
+import { CustomerLoyaltyCard } from "@/components/admin/CustomerLoyaltyCard";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,21 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
           }}
         />
       </div>
+
+      <CustomerLoyaltyCard
+        customerId={customer.id}
+        loyaltyPoints={customer.loyaltyPoints}
+        memberships={customer.memberships.map((m) => ({
+          id: m.id,
+          planName: m.plan.name,
+          remainingCredits: m.remainingCredits,
+          expiresAt: m.expiresAt.toISOString().slice(0, 10),
+        }))}
+        giftCards={customer.giftCards.map((g) => ({
+          code: g.code,
+          remainingAmount: Number(g.remainingAmount),
+        }))}
+      />
 
       <CustomerPhotos
         customerId={customer.id}

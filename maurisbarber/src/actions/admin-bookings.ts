@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasBookingConflict } from "@/lib/availability";
 import { notifications } from "@/lib/notifications";
+import { awardPointsForBooking } from "@/lib/loyalty";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -127,5 +128,71 @@ export async function updateBookingPayment(input: unknown) {
     where: { id: data.bookingId },
     data: { paymentStatus: data.paymentStatus, paymentMethod: data.paymentMethod },
   });
+  if (data.paymentStatus === "PAID") {
+    await awardPointsForBooking(data.bookingId);
+  }
+  revalidatePath("/admin/agenda");
+}
+
+const membershipPaymentSchema = z.object({
+  bookingId: z.string().cuid(),
+  customerMembershipId: z.string().cuid(),
+});
+
+export async function payWithMembershipCredit(input: unknown) {
+  await requireAdmin();
+  const data = membershipPaymentSchema.parse(input);
+
+  const membership = await prisma.customerMembership.findUnique({ where: { id: data.customerMembershipId } });
+  if (!membership) throw new Error("Membresía no encontrada");
+  if (membership.remainingCredits <= 0) throw new Error("La membresía no tiene créditos disponibles");
+  if (membership.expiresAt < new Date()) throw new Error("La membresía está vencida");
+
+  await prisma.$transaction([
+    prisma.booking.update({
+      where: { id: data.bookingId },
+      data: { paymentStatus: "PAID", paymentMethod: "MEMBERSHIP_CREDIT" },
+    }),
+    prisma.customerMembership.update({
+      where: { id: membership.id },
+      data: { remainingCredits: { decrement: 1 } },
+    }),
+  ]);
+  await awardPointsForBooking(data.bookingId);
+
+  revalidatePath("/admin/agenda");
+}
+
+const giftCardPaymentSchema = z.object({
+  bookingId: z.string().cuid(),
+  code: z.string().trim().min(1),
+});
+
+export async function payWithGiftCard(input: unknown) {
+  await requireAdmin();
+  const data = giftCardPaymentSchema.parse(input);
+
+  const booking = await prisma.booking.findUnique({ where: { id: data.bookingId } });
+  if (!booking) throw new Error("Turno no encontrado");
+
+  const giftCard = await prisma.giftCard.findUnique({ where: { code: data.code.toUpperCase() } });
+  if (!giftCard || !giftCard.active) throw new Error("Gift card inválida");
+  if (giftCard.expiresAt && giftCard.expiresAt < new Date()) throw new Error("La gift card está vencida");
+  if (Number(giftCard.remainingAmount) < Number(booking.price)) {
+    throw new Error("El saldo de la gift card no alcanza para cubrir el turno");
+  }
+
+  await prisma.$transaction([
+    prisma.booking.update({
+      where: { id: booking.id },
+      data: { paymentStatus: "PAID", paymentMethod: "GIFT_CARD" },
+    }),
+    prisma.giftCard.update({
+      where: { id: giftCard.id },
+      data: { remainingAmount: { decrement: Number(booking.price) } },
+    }),
+  ]);
+  await awardPointsForBooking(booking.id);
+
   revalidatePath("/admin/agenda");
 }

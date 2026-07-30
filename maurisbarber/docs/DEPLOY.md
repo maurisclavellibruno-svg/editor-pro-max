@@ -119,7 +119,10 @@ docker run -d --name maurisbarber --env-file .env -p 3000:3000 \
 ```
 
 Probá que responde localmente: `curl -I http://localhost:3000` (debería
-devolver `200`).
+devolver `200`). Si en cambio da "Failed to connect", revisá el log con
+`docker logs maurisbarber`: si dice `Local: http://tu-hostname:3000` en vez
+de `0.0.0.0`, confirmá que `HOSTNAME=0.0.0.0` esté en tu `.env` (ver Paso 4)
+y recreá el contenedor.
 
 ## Paso 7 — DNS: apuntar el dominio al VPS
 
@@ -194,3 +197,5 @@ docker run -d --name maurisbarber --env-file .env -p 3000:3000 --network host --
 | La app no responde en el dominio pero sí en `localhost:3000` | DNS todavía no propagó, o falta reiniciar Caddy (`systemctl reload caddy`) |
 | Los emails no llegan | Revisá `SMTP_PASSWORD` (la API key de Resend), y que `SMTP_FROM_EMAIL` sea del dominio verificado en Resend (o usá `onboarding@resend.dev` mientras tanto) |
 | `prisma migrate deploy` falla por conexión | Confirmá que `docker compose up -d postgres` esté corriendo (`docker ps`) y que `DATABASE_URL` use `localhost` (porque el contenedor de la app corre con `--network host`) |
+| Prisma dice "the URL must start with the protocol postgresql://" | Tu `.env` tiene valores entre comillas — `docker run --env-file` no las saca (a diferencia de Next.js en desarrollo). Sacá todas las comillas del archivo: `sed -i 's/"//g' .env` |
+| `curl -I http://localhost:3000` da "Failed to connect" pero `docker logs maurisbarber` dice "Ready" | Al servidor le falta `HOSTNAME=0.0.0.0` en el `.env` (ver nota en Paso 6) — sin eso, Next.js escucha solo en el hostname del VPS y no en todas las interfaces |

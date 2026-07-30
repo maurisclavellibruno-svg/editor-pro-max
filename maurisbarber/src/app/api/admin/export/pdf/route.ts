@@ -49,6 +49,7 @@ async function renderPdf(
     const rows: [string, string][] = [
       ["Ingresos reales", `$${stats.realRevenue.toFixed(0)}`],
       ["Ingresos esperados", `$${stats.expectedRevenue.toFixed(0)}`],
+      ["Ingresos por productos", `$${stats.productRevenue.toFixed(0)}`],
       ["Egresos", `$${stats.expenses.toFixed(0)}`],
       ["Ganancia", `$${stats.profit.toFixed(0)}`],
       ["Turnos completados", `${stats.completedCount}`],
@@ -69,6 +70,12 @@ async function renderPdf(
     doc.moveDown(0.5).fontSize(11);
     for (const s of stats.revenueByService) {
       doc.text(`${s.serviceName}: ${s.count} turnos · $${s.revenue.toFixed(0)}`);
+    }
+
+    doc.moveDown(1.5).fontSize(14).text("Ingresos por producto");
+    doc.moveDown(0.5).fontSize(11);
+    for (const p of stats.revenueByProduct) {
+      doc.text(`${p.productName}: x${p.quantity} · $${p.revenue.toFixed(0)}`);
     }
 
     doc.moveDown(1.5).fontSize(14).text("Ranking de clientes");

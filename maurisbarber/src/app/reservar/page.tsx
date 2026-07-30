@@ -1,10 +1,14 @@
 import { BookingWizard } from "@/components/booking/BookingWizard";
 import { getActiveServices } from "@/lib/data";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReservarPage() {
-  const services = await getActiveServices();
+  const [services, employees] = await Promise.all([
+    getActiveServices(),
+    prisma.employee.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
+  ]);
 
   return (
     <BookingWizard
@@ -16,6 +20,7 @@ export default async function ReservarPage() {
         duration: s.duration,
         color: s.color,
       }))}
+      employees={employees.map((e) => ({ id: e.id, name: e.name }))}
     />
   );
 }

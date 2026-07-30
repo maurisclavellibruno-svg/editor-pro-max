@@ -15,12 +15,18 @@ interface Service {
   color: string;
 }
 
-type Step = "service" | "date" | "time" | "contact" | "done";
+interface Employee {
+  id: string;
+  name: string;
+}
 
-export function BookingWizard({ services }: { services: Service[] }) {
+type Step = "service" | "barbero" | "date" | "time" | "contact" | "done";
+
+export function BookingWizard({ services, employees }: { services: Service[]; employees: Employee[] }) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("service");
   const [serviceId, setServiceId] = useState<string | null>(null);
+  const [employeeId, setEmployeeId] = useState<string>("");
   const [date, setDate] = useState<string | null>(null);
   const [time, setTime] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>([]);
@@ -34,16 +40,18 @@ export function BookingWizard({ services }: { services: Service[] }) {
   const [error, setError] = useState<string | null>(null);
 
   const selectedService = services.find((s) => s.id === serviceId) ?? null;
+  const selectedEmployee = employees.find((e) => e.id === employeeId) ?? null;
 
   useEffect(() => {
     if (!serviceId || !date) return;
     setLoadingSlots(true);
     setTime(null);
-    fetch(`/api/disponibilidad?serviceId=${serviceId}&date=${date}`)
+    const employeeParam = employeeId ? `&employeeId=${employeeId}` : "";
+    fetch(`/api/disponibilidad?serviceId=${serviceId}&date=${date}${employeeParam}`)
       .then((res) => res.json())
       .then((data) => setSlots(data.slots ?? []))
       .finally(() => setLoadingSlots(false));
-  }, [serviceId, date]);
+  }, [serviceId, employeeId, date]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,6 +61,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
 
     const formData = new FormData();
     formData.set("serviceId", serviceId);
+    formData.set("employeeId", employeeId);
     formData.set("date", date);
     formData.set("time", time);
     formData.set("firstName", firstName);
@@ -80,7 +89,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
         ← Volver al inicio
       </button>
 
-      <StepIndicator step={step} />
+      <StepIndicator step={step} hasBarberoStep={employees.length > 1} />
 
       {step === "service" && (
         <div className="mt-8 animate-rise-in space-y-3">
@@ -91,7 +100,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
               type="button"
               onClick={() => {
                 setServiceId(service.id);
-                setStep("date");
+                setStep(employees.length > 1 ? "barbero" : "date");
               }}
               className="flex w-full items-center justify-between rounded-2xl border border-line bg-white p-5 text-left shadow-card transition-transform hover:-translate-y-0.5"
             >
@@ -105,10 +114,44 @@ export function BookingWizard({ services }: { services: Service[] }) {
         </div>
       )}
 
+      {step === "barbero" && (
+        <div className="mt-8 animate-rise-in space-y-3">
+          <h1 className="text-2xl font-semibold text-ink">¿Con quién preferís tu turno?</h1>
+          <p className="mt-1 text-sm text-ink-muted">{selectedService?.name}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setEmployeeId("");
+              setStep("date");
+            }}
+            className="flex w-full items-center justify-between rounded-2xl border border-line bg-white p-5 text-left shadow-card transition-transform hover:-translate-y-0.5"
+          >
+            <p className="font-medium text-ink">Cualquiera disponible</p>
+          </button>
+          {employees.map((employee) => (
+            <button
+              key={employee.id}
+              type="button"
+              onClick={() => {
+                setEmployeeId(employee.id);
+                setStep("date");
+              }}
+              className="flex w-full items-center justify-between rounded-2xl border border-line bg-white p-5 text-left shadow-card transition-transform hover:-translate-y-0.5"
+            >
+              <p className="font-medium text-ink">{employee.name}</p>
+            </button>
+          ))}
+          <BackButton onClick={() => setStep("service")} />
+        </div>
+      )}
+
       {step === "date" && (
         <div className="mt-8 animate-rise-in">
           <h1 className="text-2xl font-semibold text-ink">Elegí el día</h1>
-          <p className="mt-1 text-sm text-ink-muted">{selectedService?.name}</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {selectedService?.name}
+            {selectedEmployee && ` · ${selectedEmployee.name}`}
+          </p>
           <div className="mt-6">
             <DatePicker
               selectedDate={date}
@@ -118,7 +161,7 @@ export function BookingWizard({ services }: { services: Service[] }) {
               }}
             />
           </div>
-          <BackButton onClick={() => setStep("service")} />
+          <BackButton onClick={() => setStep(employees.length > 1 ? "barbero" : "service")} />
         </div>
       )}
 
@@ -126,7 +169,8 @@ export function BookingWizard({ services }: { services: Service[] }) {
         <div className="mt-8 animate-rise-in">
           <h1 className="text-2xl font-semibold text-ink">Elegí el horario</h1>
           <p className="mt-1 text-sm text-ink-muted">
-            {selectedService?.name} · {date}
+            {selectedService?.name}
+            {selectedEmployee && ` · ${selectedEmployee.name}`} · {date}
           </p>
           <div className="mt-6 grid grid-cols-3 gap-2 sm:grid-cols-4">
             {loadingSlots && <p className="col-span-full text-sm text-ink-muted">Cargando horarios…</p>}
@@ -191,8 +235,10 @@ export function BookingWizard({ services }: { services: Service[] }) {
   );
 }
 
-function StepIndicator({ step }: { step: Step }) {
-  const steps: Step[] = ["service", "date", "time", "contact"];
+function StepIndicator({ step, hasBarberoStep }: { step: Step; hasBarberoStep: boolean }) {
+  const steps: Step[] = hasBarberoStep
+    ? ["service", "barbero", "date", "time", "contact"]
+    : ["service", "date", "time", "contact"];
   const currentIndex = steps.indexOf(step);
   if (step === "done") return null;
   return (

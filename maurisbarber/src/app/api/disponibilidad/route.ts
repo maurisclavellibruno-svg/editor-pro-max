@@ -13,12 +13,16 @@ export async function GET(request: NextRequest) {
   const parsed = availabilityQuerySchema.safeParse({
     serviceId: searchParams.get("serviceId"),
     date: searchParams.get("date"),
+    employeeId: searchParams.get("employeeId") ?? undefined,
   });
 
   if (!parsed.success) {
     return NextResponse.json({ error: "Parámetros inválidos" }, { status: 400 });
   }
 
-  const slots = await getAvailableSlots(parsed.data);
+  const slots = await getAvailableSlots({
+    ...parsed.data,
+    employeeId: parsed.data.employeeId || undefined,
+  });
   return NextResponse.json({ slots });
 }

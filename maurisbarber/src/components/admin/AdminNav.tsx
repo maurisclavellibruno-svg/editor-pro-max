@@ -8,6 +8,8 @@ const links = [
   { href: "/admin/agenda", label: "Agenda" },
   { href: "/admin/clientes", label: "Clientes" },
   { href: "/admin/servicios", label: "Servicios" },
+  { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/empleados", label: "Empleados" },
   { href: "/admin/horarios", label: "Horarios" },
   { href: "/admin/estadisticas", label: "Estadísticas" },
 ];

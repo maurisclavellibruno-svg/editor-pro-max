@@ -7,13 +7,24 @@ export interface AvailabilityInput {
   serviceId: string;
   /** "YYYY-MM-DD", interpreted in the server's local timezone. */
   date: string;
+  /** Omit (or leave undefined) to check across every active barber. */
   employeeId?: string;
 }
+
+type ServiceForScheduling = {
+  schedulingMode: string;
+  duration: number;
+  frequencyMinutes: number | null;
+  manualSlots: string[];
+};
 
 /**
  * Returns the list of bookable "HH:mm" start times for a service on a given
  * day, taking into account business hours, breaks, blocked dates, and
  * existing bookings.
+ *
+ * With no `employeeId`, a slot is included if AT LEAST ONE active barber is
+ * free then (used for the public "cualquier barbero disponible" option).
  *
  * Key rule for "trabajo en paralelo": an existing booking only consumes the
  * barber's capacity (blocks other slots) when its service has
@@ -28,42 +39,49 @@ export async function getAvailableSlots({
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
   if (!service || !service.active) return [];
 
-  const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
-    : await prisma.employee.findFirst({ where: { active: true } });
-  if (!employee) return [];
+  const employees = employeeId
+    ? await prisma.employee.findMany({ where: { id: employeeId } })
+    : await prisma.employee.findMany({ where: { active: true } });
+  if (employees.length === 0) return [];
 
-  const dow = dayOfWeek(date);
+  const dayInfo = await getDayInfo(date);
+  if (!dayInfo) return [];
 
-  const hours = await prisma.businessHours.findUnique({ where: { dayOfWeek: dow } });
-  if (!hours || hours.isClosed) return [];
+  const slotSet = new Set<string>();
+  for (const employee of employees) {
+    const slots = await getAvailableSlotsForEmployee(service, employee.id, date, dayInfo);
+    for (const slot of slots) slotSet.add(slot);
+  }
+  return Array.from(slotSet).sort();
+}
+
+/**
+ * Like `getAvailableSlots`, but also returns which specific employee is free
+ * for each slot — needed to actually assign a barber when the customer picks
+ * "cualquiera disponible".
+ */
+async function getAvailableSlotsForEmployee(
+  service: ServiceForScheduling,
+  employeeId: string,
+  date: string,
+  dayInfo: DayInfo,
+): Promise<string[]> {
+  const { openMin, closeMin, breaks } = dayInfo;
+  const duration = service.duration;
+  const candidateStarts = buildCandidateStarts(service, openMin, closeMin);
 
   const dayStart = new Date(date + "T00:00:00");
   const dayEnd = new Date(date + "T23:59:59.999");
-  const fullDayBlock = await prisma.blockedDate.findFirst({
-    where: { startDate: { lte: dayEnd }, endDate: { gte: dayStart } },
-  });
-  if (fullDayBlock) return [];
-
-  const breaks = await prisma.breakTime.findMany({ where: { dayOfWeek: dow } });
-
-  const openMin = timeToMinutes(hours.openTime);
-  const closeMin = timeToMinutes(hours.closeTime);
-  const duration = service.duration;
-
-  const candidateStarts = buildCandidateStarts(service, openMin, closeMin);
 
   const dayBookings = await prisma.booking.findMany({
     where: {
-      employeeId: employee.id,
+      employeeId,
       status: { in: [...BLOCKING_STATUSES] },
       startAt: { lt: dayEnd },
       endAt: { gt: dayStart },
     },
     include: { service: true },
   });
-
-  // Only bookings whose service does NOT allow parallel work consume capacity.
   const blockingBookings = dayBookings.filter((b) => !b.service.allowsParallel);
 
   const now = new Date();
@@ -93,8 +111,36 @@ export async function getAvailableSlots({
     .sort();
 }
 
+interface DayInfo {
+  openMin: number;
+  closeMin: number;
+  breaks: { startTime: string; endTime: string }[];
+}
+
+async function getDayInfo(date: string): Promise<DayInfo | null> {
+  const dow = dayOfWeek(date);
+
+  const hours = await prisma.businessHours.findUnique({ where: { dayOfWeek: dow } });
+  if (!hours || hours.isClosed) return null;
+
+  const dayStart = new Date(date + "T00:00:00");
+  const dayEnd = new Date(date + "T23:59:59.999");
+  const fullDayBlock = await prisma.blockedDate.findFirst({
+    where: { startDate: { lte: dayEnd }, endDate: { gte: dayStart } },
+  });
+  if (fullDayBlock) return null;
+
+  const breaks = await prisma.breakTime.findMany({ where: { dayOfWeek: dow } });
+
+  return {
+    openMin: timeToMinutes(hours.openTime),
+    closeMin: timeToMinutes(hours.closeTime),
+    breaks,
+  };
+}
+
 function buildCandidateStarts(
-  service: { schedulingMode: string; duration: number; frequencyMinutes: number | null; manualSlots: string[] },
+  service: ServiceForScheduling,
   openMin: number,
   closeMin: number,
 ): number[] {
@@ -130,6 +176,31 @@ function isTodayStr(dateStr: string): boolean {
 export async function isSlotAvailable(input: AvailabilityInput & { time: string }): Promise<boolean> {
   const slots = await getAvailableSlots(input);
   return slots.includes(input.time);
+}
+
+/**
+ * Picks a specific employee to assign a booking to. If `employeeId` is given,
+ * validates that barber is free at `time`; otherwise returns the first active
+ * barber who is. Returns null if nobody is available (e.g. a race with
+ * another booking submitted moments earlier).
+ */
+export async function pickAvailableEmployee(input: AvailabilityInput & { time: string }): Promise<string | null> {
+  const service = await prisma.service.findUnique({ where: { id: input.serviceId } });
+  if (!service || !service.active) return null;
+
+  const employees = input.employeeId
+    ? await prisma.employee.findMany({ where: { id: input.employeeId } })
+    : await prisma.employee.findMany({ where: { active: true } });
+  if (employees.length === 0) return null;
+
+  const dayInfo = await getDayInfo(input.date);
+  if (!dayInfo) return null;
+
+  for (const employee of employees) {
+    const slots = await getAvailableSlotsForEmployee(service, employee.id, input.date, dayInfo);
+    if (slots.includes(input.time)) return employee.id;
+  }
+  return null;
 }
 
 /**

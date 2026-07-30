@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const createBookingSchema = z.object({
   serviceId: z.string().cuid(),
+  employeeId: z.string().cuid().optional().or(z.literal("")),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fecha inválida"),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Horario inválido"),
   firstName: z.string().trim().min(1, "Ingresá tu nombre").max(80),
@@ -19,4 +20,5 @@ export type CreateBookingInput = z.infer<typeof createBookingSchema>;
 export const availabilityQuerySchema = z.object({
   serviceId: z.string().cuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  employeeId: z.string().cuid().optional().or(z.literal("")),
 });

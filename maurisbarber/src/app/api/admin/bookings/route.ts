@@ -10,18 +10,22 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const start = searchParams.get("start");
   const end = searchParams.get("end");
+  const employeeId = searchParams.get("employeeId");
 
   const bookings = await prisma.booking.findMany({
     where: {
       ...(start && end ? { startAt: { lt: new Date(end) }, endAt: { gt: new Date(start) } } : {}),
+      ...(employeeId ? { employeeId } : {}),
     },
-    include: { service: true, customer: true },
+    include: { service: true, customer: true, employee: true },
     orderBy: { startAt: "asc" },
   });
 
   const events = bookings.map((b) => ({
     id: b.id,
-    title: `${b.customer.firstName} ${b.customer.lastName} · ${b.service.name}`,
+    title: `${b.customer.firstName} ${b.customer.lastName} · ${b.service.name}${
+      !employeeId ? ` (${b.employee.name})` : ""
+    }`,
     start: b.startAt.toISOString(),
     end: b.endAt.toISOString(),
     backgroundColor: STATUS_COLORS[b.status] ?? b.service.color,

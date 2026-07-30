@@ -20,8 +20,10 @@ export interface DashboardStats {
   occupancyPercent: number;
   hoursWorked: number;
   hoursAvailable: number;
+  productRevenue: number;
   revenueByDay: { date: string; revenue: number }[];
   revenueByService: { serviceName: string; revenue: number; count: number }[];
+  revenueByProduct: { productName: string; revenue: number; quantity: number }[];
   topCustomers: { name: string; totalSpent: number }[];
 }
 
@@ -38,6 +40,12 @@ export async function getDashboardStats(range: DateRange): Promise<DashboardStat
   const noShow = bookings.filter((b) => b.status === "NO_SHOW");
   const worked = bookings.filter((b) => WORKED_STATUSES.includes(b.status as (typeof WORKED_STATUSES)[number]));
 
+  const productSales = await prisma.productSale.findMany({
+    where: { date: { gte: range.start, lt: range.end } },
+    include: { product: true },
+  });
+  const productRevenue = sumDecimal(productSales.map((s) => Number(s.unitPrice) * s.quantity));
+
   const bookingIncome = sumDecimal(paidBookings.map((b) => Number(b.price)));
   const [manualIncome, manualExpense] = await Promise.all([
     prisma.transaction.aggregate({
@@ -50,7 +58,7 @@ export async function getDashboardStats(range: DateRange): Promise<DashboardStat
     }),
   ]);
 
-  const realRevenue = bookingIncome + Number(manualIncome._sum.amount ?? 0);
+  const realRevenue = bookingIncome + productRevenue + Number(manualIncome._sum.amount ?? 0);
   const expenses = Number(manualExpense._sum.amount ?? 0);
   const expectedRevenue = sumDecimal(nonCancelled.map((b) => Number(b.price)));
 
@@ -71,6 +79,10 @@ export async function getDashboardStats(range: DateRange): Promise<DashboardStat
     const key = toDateStr(b.startAt);
     revenueByDayMap.set(key, (revenueByDayMap.get(key) ?? 0) + Number(b.price));
   }
+  for (const s of productSales) {
+    const key = toDateStr(s.date);
+    revenueByDayMap.set(key, (revenueByDayMap.get(key) ?? 0) + Number(s.unitPrice) * s.quantity);
+  }
 
   const serviceMap = new Map<string, { serviceName: string; revenue: number; count: number }>();
   for (const b of nonCancelled) {
@@ -78,6 +90,14 @@ export async function getDashboardStats(range: DateRange): Promise<DashboardStat
     entry.count += 1;
     if (b.paymentStatus === "PAID") entry.revenue += Number(b.price);
     serviceMap.set(b.serviceId, entry);
+  }
+
+  const productMap = new Map<string, { productName: string; revenue: number; quantity: number }>();
+  for (const s of productSales) {
+    const entry = productMap.get(s.productId) ?? { productName: s.product.name, revenue: 0, quantity: 0 };
+    entry.quantity += s.quantity;
+    entry.revenue += Number(s.unitPrice) * s.quantity;
+    productMap.set(s.productId, entry);
   }
 
   const topCustomers = await getTopCustomers(10);
@@ -98,8 +118,10 @@ export async function getDashboardStats(range: DateRange): Promise<DashboardStat
     occupancyPercent,
     hoursWorked,
     hoursAvailable,
+    productRevenue,
     revenueByDay: Array.from(revenueByDayMap, ([date, revenue]) => ({ date, revenue })),
     revenueByService: Array.from(serviceMap.values()).sort((a, b) => b.revenue - a.revenue),
+    revenueByProduct: Array.from(productMap.values()).sort((a, b) => b.revenue - a.revenue),
     topCustomers,
   };
 }

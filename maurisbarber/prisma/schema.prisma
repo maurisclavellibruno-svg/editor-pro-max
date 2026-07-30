@@ -143,10 +143,11 @@ model Customer {
   // Free-form catch-all for anything that doesn't fit the fields above.
   notes String @default("")
 
-  bookings  Booking[]
-  photos    CustomerPhoto[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  bookings     Booking[]
+  photos       CustomerPhoto[]
+  productSales ProductSale[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   @@unique([phone])
 }
@@ -220,10 +221,10 @@ model Booking {
 }
 
 // ---------------------------------------------------------------------------
-// Finance — manual income/expense ledger. Booking payments already count as
-// income automatically (via paymentStatus = PAID) and are NOT duplicated
-// here; this table is only for entries with no booking behind them
-// (product sales, rent, supplies, etc).
+// Finance — manual income/expense ledger. Booking payments and product sales
+// already count as income automatically (via Booking.paymentStatus = PAID
+// and ProductSale) and are NOT duplicated here; this table is only for
+// entries with no booking/sale behind them (rent, supplies, etc).
 // ---------------------------------------------------------------------------
 
 enum TransactionType {
@@ -239,6 +240,42 @@ model Transaction {
   description String
   date        DateTime
   createdAt   DateTime        @default(now())
+
+  @@index([date])
+}
+
+// ---------------------------------------------------------------------------
+// Product sales — retail products (shampoo, wax, etc.) sold at the shop.
+// Kept separate from Service/Booking since products aren't scheduled.
+// ---------------------------------------------------------------------------
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @default("")
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl    String?
+  active      Boolean  @default(true)
+  // Null means stock isn't tracked for this product.
+  stock       Int?
+
+  sales     ProductSale[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ProductSale {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id])
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  quantity   Int
+  // Snapshot of the unit price at sale time.
+  unitPrice     Decimal        @db.Decimal(10, 2)
+  paymentMethod PaymentMethod?
+  date          DateTime
+  createdAt     DateTime       @default(now())
 
   @@index([date])
 }

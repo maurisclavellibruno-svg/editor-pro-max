@@ -11,20 +11,28 @@ interface Service {
   price: number;
 }
 
+interface Employee {
+  id: string;
+  name: string;
+}
+
 export function NewBookingModal({
   startAt,
-  employeeId,
+  employees,
+  defaultEmployeeId,
   services,
   onClose,
   onCreated,
 }: {
   startAt: Date;
-  employeeId: string;
+  employees: Employee[];
+  defaultEmployeeId: string;
   services: Service[];
   onClose: () => void;
   onCreated: () => void;
 }) {
   const [serviceId, setServiceId] = useState(services[0]?.id ?? "");
+  const [employeeId, setEmployeeId] = useState(defaultEmployeeId);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -77,6 +85,22 @@ export function NewBookingModal({
               ))}
             </select>
           </label>
+          {employees.length > 1 && (
+            <label className="block text-sm">
+              <span className="mb-1.5 block font-medium text-ink-soft">Barbero</span>
+              <select
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                className="w-full rounded-xl border border-line px-4 py-3"
+              >
+                {employees.map((emp) => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Nombre" value={firstName} onChange={setFirstName} />
             <Field label="Apellido" value={lastName} onChange={setLastName} />

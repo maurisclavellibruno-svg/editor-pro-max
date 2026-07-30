@@ -11,12 +11,17 @@ export async function GET(request: NextRequest) {
   if (!session) return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
   const { range } = parsePeriodFromRequest(request);
-  const [stats, bookings] = await Promise.all([
+  const [stats, bookings, productSales] = await Promise.all([
     getDashboardStats(range),
     prisma.booking.findMany({
       where: { startAt: { gte: range.start, lt: range.end } },
       include: { customer: true, service: true },
       orderBy: { startAt: "asc" },
+    }),
+    prisma.productSale.findMany({
+      where: { date: { gte: range.start, lt: range.end } },
+      include: { product: true, customer: true },
+      orderBy: { date: "asc" },
     }),
   ]);
 
@@ -30,6 +35,7 @@ export async function GET(request: NextRequest) {
   summarySheet.addRows([
     { label: "Ingresos reales", value: stats.realRevenue },
     { label: "Ingresos esperados", value: stats.expectedRevenue },
+    { label: "Ingresos por productos", value: stats.productRevenue },
     { label: "Egresos", value: stats.expenses },
     { label: "Ganancia", value: stats.profit },
     { label: "Turnos totales", value: stats.bookingCount },
@@ -67,6 +73,29 @@ export async function GET(request: NextRequest) {
     });
   }
   bookingsSheet.getRow(1).font = { bold: true };
+
+  const productsSheet = workbook.addWorksheet("Ventas de productos");
+  productsSheet.columns = [
+    { header: "Fecha", key: "date", width: 20 },
+    { header: "Producto", key: "product", width: 24 },
+    { header: "Cantidad", key: "quantity", width: 12 },
+    { header: "Precio unitario", key: "unitPrice", width: 16 },
+    { header: "Total", key: "total", width: 12 },
+    { header: "Cliente", key: "customer", width: 24 },
+    { header: "Método", key: "method", width: 14 },
+  ];
+  for (const s of productSales) {
+    productsSheet.addRow({
+      date: s.date.toLocaleString("es-UY", { dateStyle: "short", timeStyle: "short" }),
+      product: s.product.name,
+      quantity: s.quantity,
+      unitPrice: Number(s.unitPrice),
+      total: Number(s.unitPrice) * s.quantity,
+      customer: s.customer ? `${s.customer.firstName} ${s.customer.lastName}` : "",
+      method: s.paymentMethod ?? "",
+    });
+  }
+  productsSheet.getRow(1).font = { bold: true };
 
   const buffer = await workbook.xlsx.writeBuffer();
 

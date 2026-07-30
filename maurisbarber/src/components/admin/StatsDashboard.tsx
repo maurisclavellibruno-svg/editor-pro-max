@@ -116,6 +116,25 @@ export function StatsDashboard({ period, stats }: Props) {
 
       <div className="rounded-2xl border border-line bg-white p-6 shadow-card">
         <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-muted">
+          Ingresos por producto
+        </h2>
+        <div className="space-y-3">
+          {stats.revenueByProduct.map((p) => (
+            <div key={p.productName} className="flex items-center justify-between text-sm">
+              <span className="text-ink">
+                {p.productName} <span className="text-ink-muted">(x{p.quantity})</span>
+              </span>
+              <span className="font-medium text-ink">${round(p.revenue)}</span>
+            </div>
+          ))}
+          {stats.revenueByProduct.length === 0 && (
+            <p className="text-sm text-ink-muted">Sin ventas de productos en este período.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-line bg-white p-6 shadow-card">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-ink-muted">
           Ranking de clientes que más gastan
         </h2>
         <div className="space-y-2">

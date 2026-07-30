@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { isSlotAvailable } from "@/lib/availability";
+import { pickAvailableEmployee } from "@/lib/availability";
 import { notifications } from "@/lib/notifications";
 import { createBookingSchema } from "@/schemas/booking";
 import { dateWithMinutes, timeToMinutes } from "@/lib/time";
@@ -23,6 +23,7 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
 
   const raw = {
     serviceId: formData.get("serviceId"),
+    employeeId: formData.get("employeeId"),
     date: formData.get("date"),
     time: formData.get("time"),
     firstName: formData.get("firstName"),
@@ -42,18 +43,13 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     return { ok: false, error: "El servicio seleccionado no está disponible" };
   }
 
-  const employee = await prisma.employee.findFirst({ where: { active: true } });
-  if (!employee) {
-    return { ok: false, error: "No hay barberos disponibles en este momento" };
-  }
-
-  const available = await isSlotAvailable({
+  const employeeId = await pickAvailableEmployee({
     serviceId: data.serviceId,
     date: data.date,
     time: data.time,
-    employeeId: employee.id,
+    employeeId: data.employeeId || undefined,
   });
-  if (!available) {
+  if (!employeeId) {
     return { ok: false, error: "Ese horario ya no está disponible. Elegí otro." };
   }
 
@@ -79,7 +75,7 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     data: {
       customerId: customer.id,
       serviceId: service.id,
-      employeeId: employee.id,
+      employeeId,
       startAt,
       endAt,
       price: service.price,

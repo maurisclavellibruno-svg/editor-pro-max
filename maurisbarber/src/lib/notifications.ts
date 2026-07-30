@@ -68,7 +68,10 @@ class EmailNotificationProvider implements NotificationProvider {
       return;
     }
     await transporter.sendMail({
-      from: process.env.SMTP_USER ?? "no-reply@maurisbarber.com",
+      // Deliberately NOT process.env.SMTP_USER: for providers like Resend,
+      // the SMTP username is a fixed literal ("resend"), not an email
+      // address, so it can't double as the From header.
+      from: process.env.SMTP_FROM_EMAIL ?? "no-reply@maurisbarber.com",
       to,
       subject,
       text,

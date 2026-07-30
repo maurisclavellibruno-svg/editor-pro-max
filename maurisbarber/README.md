@@ -37,12 +37,19 @@ Panel admin: `http://localhost:3000/admin/login` con las credenciales de `ADMIN_
 ```bash
 docker compose up -d postgres      # base de datos
 docker build -t maurisbarber .
-docker run -d --name maurisbarber --env-file .env -p 3000:3000 --network host maurisbarber
-npx prisma migrate deploy          # aplica migraciones contra la base de producción
-npm run db:seed                    # solo la primera vez
+docker run -d --name maurisbarber --env-file .env -p 3000:3000 --network host --restart unless-stopped maurisbarber
+
+# La imagen final (runner) no incluye el CLI de Prisma a propósito, para
+# mantenerla liviana — migrate/seed corren desde la etapa "builder" (que sí
+# tiene todas las devDependencies):
+docker build --target builder -t maurisbarber:migrator .
+docker run --rm --network host --env-file .env maurisbarber:migrator npx prisma migrate deploy
+docker run --rm --network host --env-file .env maurisbarber:migrator npm run db:seed   # solo la primera vez
 ```
 
 En producción, configurá `NEXTAUTH_URL` con el dominio real (https) y generá un `NEXTAUTH_SECRET` nuevo con `openssl rand -base64 32`.
+
+Para una guía completa paso a paso (VPS de Hostinger, Caddy con HTTPS automático, DNS, Resend para email), ver [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Backups
 

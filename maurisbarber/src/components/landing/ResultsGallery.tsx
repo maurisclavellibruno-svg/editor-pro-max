@@ -9,6 +9,16 @@ const results = [
     after: "/assets/results/cliente-1-despues.jpg",
     alt: "Resultado de asesoría de estilo",
   },
+  {
+    before: "/assets/results/cliente-2-antes.jpg",
+    after: "/assets/results/cliente-2-despues.jpg",
+    alt: "Resultado de asesoría de estilo",
+  },
+  {
+    before: "/assets/results/cliente-3-antes.jpg",
+    after: "/assets/results/cliente-3-despues.jpg",
+    alt: "Resultado de asesoría de estilo",
+  },
 ];
 
 export function ResultsGallery() {

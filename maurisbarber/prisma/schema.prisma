@@ -335,3 +335,20 @@ model GiftCard {
   customer        Customer? @relation(fields: [customerId], references: [id])
   createdAt       DateTime  @default(now())
 }
+
+// ---------------------------------------------------------------------------
+// Reseñas públicas
+// ---------------------------------------------------------------------------
+
+// Submitted by clients from the public site. Hidden from the landing page
+// until an admin approves them, to keep out spam and abuse.
+model Review {
+  id        String   @id @default(cuid())
+  name      String
+  rating    Int // 1-5
+  text      String
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([approved])
+}

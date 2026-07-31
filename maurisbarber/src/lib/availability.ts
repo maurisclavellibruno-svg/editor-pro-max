@@ -179,6 +179,31 @@ export async function isSlotAvailable(input: AvailabilityInput & { time: string 
 }
 
 /**
+ * Finds the soonest real bookable slot, scanning forward from today across
+ * the shop's oldest active service (used as a representative default for the
+ * "próxima disponibilidad" banner on the landing page — no fabricated
+ * numbers, just an actual open slot from the availability engine).
+ */
+export async function getNextAvailableSlot(maxDaysAhead = 14): Promise<{ date: string; time: string } | null> {
+  const service = await prisma.service.findFirst({
+    where: { active: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!service) return null;
+
+  const today = new Date();
+  for (let i = 0; i < maxDaysAhead; i++) {
+    const day = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+    const dateStr = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`;
+    const slots = await getAvailableSlots({ serviceId: service.id, date: dateStr });
+    if (slots.length > 0) {
+      return { date: dateStr, time: slots[0] };
+    }
+  }
+  return null;
+}
+
+/**
  * Picks a specific employee to assign a booking to. If `employeeId` is given,
  * validates that barber is free at `time`; otherwise returns the first active
  * barber who is. Returns null if nobody is available (e.g. a race with

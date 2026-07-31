@@ -1,10 +1,12 @@
 import { Hero } from "@/components/landing/Hero";
+import { NextAvailabilityBanner } from "@/components/landing/NextAvailabilityBanner";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ResultsGallery } from "@/components/landing/ResultsGallery";
 import { AboutMe } from "@/components/landing/AboutMe";
 import { ServicesPreview } from "@/components/landing/ServicesPreview";
 import { Testimonials } from "@/components/landing/Testimonials";
+import { LeaveReview } from "@/components/landing/LeaveReview";
 import { HoursAndContact } from "@/components/landing/HoursAndContact";
 import { InstagramSection } from "@/components/landing/InstagramSection";
 import { FAQ } from "@/components/landing/FAQ";
@@ -23,6 +25,7 @@ export default async function LandingPage() {
   return (
     <main>
       <Hero name={shop.name} instagramHandle={shop.instagramHandle} whatsappNumber={shop.whatsappNumber} />
+      <NextAvailabilityBanner />
       <TrustBadges />
       <HowItWorks />
       <ResultsGallery />
@@ -38,6 +41,7 @@ export default async function LandingPage() {
         }))}
       />
       <Testimonials />
+      <LeaveReview />
       <HoursAndContact hours={hours} phone={shop.phone} address={shop.address} mapsEmbedUrl={shop.mapsEmbedUrl} />
       <InstagramSection instagramHandle={shop.instagramHandle} />
       <FAQ />

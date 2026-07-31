@@ -12,6 +12,7 @@ const links = [
   { href: "/admin/membresias", label: "Membresías" },
   { href: "/admin/giftcards", label: "Gift cards" },
   { href: "/admin/empleados", label: "Empleados" },
+  { href: "/admin/resenas", label: "Reseñas" },
   { href: "/admin/horarios", label: "Horarios" },
   { href: "/admin/estadisticas", label: "Estadísticas" },
 ];

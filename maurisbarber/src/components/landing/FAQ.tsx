@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: "¿Necesito pagar por adelantado?",
-    a: "No, el pago se realiza en el local al finalizar el servicio. Aceptamos efectivo, transferencia, débito, crédito y Mercado Pago.",
+    a: "No, el pago se realiza en el local al finalizar el servicio. Por ahora aceptamos efectivo y transferencia.",
   },
   {
     q: "¿Puedo cancelar o reprogramar mi turno?",

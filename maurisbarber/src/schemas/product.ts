@@ -5,9 +5,11 @@ export const productSchema = z.object({
   name: z.string().trim().min(1, "El nombre es obligatorio").max(100),
   description: z.string().trim().max(500).optional().default(""),
   price: z.coerce.number().min(0, "El precio no puede ser negativo"),
-  imageUrl: z.string().trim().optional().or(z.literal("")),
+  // Prisma returns null (not undefined) for an unset column, and the admin
+  // form passes that straight through — accept it here too.
+  imageUrl: z.string().trim().nullable().optional().transform((v) => v ?? ""),
   active: z.coerce.boolean().default(true),
-  stock: z.coerce.number().int().min(0).optional(),
+  stock: z.coerce.number().int().min(0).nullable().optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

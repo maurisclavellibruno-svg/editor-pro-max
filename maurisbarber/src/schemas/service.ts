@@ -10,10 +10,12 @@ export const serviceSchema = z
     price: z.coerce.number().min(0, "El precio no puede ser negativo"),
     duration: z.coerce.number().int().min(5, "La duración mínima es 5 minutos"),
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Color inválido"),
-    imageUrl: z.string().trim().optional().or(z.literal("")),
+    // Prisma returns null (not undefined) for unset optional columns, and the
+    // admin form passes that straight through — accept it here too.
+    imageUrl: z.string().trim().nullable().optional().transform((v) => v ?? ""),
     active: z.coerce.boolean().default(true),
     schedulingMode: z.enum(["CONSECUTIVE", "CUSTOM_FREQUENCY", "MANUAL"]),
-    frequencyMinutes: z.coerce.number().int().min(1).optional(),
+    frequencyMinutes: z.coerce.number().int().min(1).nullable().optional(),
     manualSlots: z.array(z.string().regex(timeRegex)).optional().default([]),
     allowsParallel: z.coerce.boolean().default(false),
   })

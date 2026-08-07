@@ -6,17 +6,17 @@ import { prisma } from "@/lib/prisma";
 const placeholders = [
   {
     name: "Federico G.",
-    quote: "Nunca nadie me había explicado qué corte realmente me favorecía.",
+    quote: "Che, quedó buenísimo. Ni sabía que ese corte me quedaba tan bien jaja.",
     rating: null as number | null,
   },
   {
     name: "Rodrigo M.",
-    quote: "Entendí qué estilos funcionan con mi rostro y ahora sé qué pedir.",
+    quote: "Antes iba y pedía \"lo de siempre\" porque ni sabía qué otra cosa pedir. Ahora tengo clarísimo qué onda me queda.",
     rating: null as number | null,
   },
   {
     name: "Bruno L.",
-    quote: "La asesoría hizo toda la diferencia. Ya es mi barbero de cabecera.",
+    quote: "Un golazo el corte. Ya no voy a otro lado.",
     rating: null as number | null,
   },
 ];
@@ -25,12 +25,12 @@ export async function Testimonials() {
   const approved = await prisma.review.findMany({
     where: { approved: true },
     orderBy: { createdAt: "desc" },
-    take: 6,
   });
 
   const real = approved.map((r) => ({ name: r.name, quote: r.text, rating: r.rating }));
-  // Real reviews first; only pad with placeholders while there aren't enough yet.
-  const testimonials = real.length >= 3 ? real : [...real, ...placeholders].slice(0, 3);
+  // Show every real review that's been approved. Only fall back to the
+  // placeholders while there isn't a single real one yet.
+  const testimonials = real.length > 0 ? real : placeholders;
 
   return (
     <Section

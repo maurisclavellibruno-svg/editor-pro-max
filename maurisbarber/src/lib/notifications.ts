@@ -60,6 +60,8 @@ class EmailNotificationProvider implements NotificationProvider {
     }
   }
 
+  // Never throws — a booking must succeed for the customer even if the
+  // notification email fails or the SMTP provider is slow/down.
   private async send(to: string | undefined, subject: string, text: string) {
     if (!to) return;
     const transporter = this.transporter();
@@ -67,15 +69,19 @@ class EmailNotificationProvider implements NotificationProvider {
       console.log(`[notifications] (SMTP no configurado) Para: ${to}\n${subject}\n${text}`);
       return;
     }
-    await transporter.sendMail({
-      // Deliberately NOT process.env.SMTP_USER: for providers like Resend,
-      // the SMTP username is a fixed literal ("resend"), not an email
-      // address, so it can't double as the From header.
-      from: process.env.SMTP_FROM_EMAIL ?? "no-reply@maurisbarber.com",
-      to,
-      subject,
-      text,
-    });
+    try {
+      await transporter.sendMail({
+        // Deliberately NOT process.env.SMTP_USER: for providers like Resend,
+        // the SMTP username is a fixed literal ("resend"), not an email
+        // address, so it can't double as the From header.
+        from: process.env.SMTP_FROM_EMAIL ?? "no-reply@maurisbarber.com",
+        to,
+        subject,
+        text,
+      });
+    } catch (err) {
+      console.error(`[notifications] Falló el envío a ${to}`, err);
+    }
   }
 }
 

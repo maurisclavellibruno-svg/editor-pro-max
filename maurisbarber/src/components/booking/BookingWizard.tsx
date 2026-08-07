@@ -69,7 +69,14 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
     formData.set("phone", phone);
     formData.set("email", email);
 
-    const result = await createBooking(formData);
+    let result;
+    try {
+      result = await createBooking(formData);
+    } catch {
+      setSubmitting(false);
+      setError("No pudimos guardar tu reserva. Probá de nuevo.");
+      return;
+    }
     setSubmitting(false);
 
     if (!result.ok) {

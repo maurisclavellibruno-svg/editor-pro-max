@@ -92,9 +92,15 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     startAt,
     price: Number(service.price),
   };
-  await notifications.notifyAdminNewBooking(payload);
-  await notifications.notifyCustomerConfirmation(payload);
-  await syncBookingBestEffort(`${service.name} — ${payload.customerName}`, `Tel: ${data.phone}`, startAt, endAt);
+  // The booking already exists in the database — it's confirmed for the
+  // customer regardless of what happens next. Notifications and the calendar
+  // sync run in the background so a slow/failing email provider never delays
+  // (or breaks) the confirmation the customer sees.
+  notifications.notifyAdminNewBooking(payload).catch((err) => console.error("[booking] admin notify failed", err));
+  notifications.notifyCustomerConfirmation(payload).catch((err) => console.error("[booking] customer notify failed", err));
+  syncBookingBestEffort(`${service.name} — ${payload.customerName}`, `Tel: ${data.phone}`, startAt, endAt).catch(
+    (err) => console.error("[booking] calendar sync failed", err),
+  );
 
   return { ok: true, bookingId: booking.id };
 }

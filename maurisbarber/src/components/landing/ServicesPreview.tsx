@@ -43,7 +43,7 @@ export function ServicesPreview({ services }: { services: Service[] }) {
       </div>
       <div className="mt-10 text-center">
         <ButtonLink href="/reservar" variant="accent" size="lg">
-          Reservar mi asesoría
+          Reservar turno
         </ButtonLink>
       </div>
     </Section>

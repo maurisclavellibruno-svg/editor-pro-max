@@ -28,7 +28,7 @@ export function Hero({ name, instagramHandle, whatsappNumber }: HeroProps) {
           </p>
           <div className="mt-10 flex animate-rise-in flex-col items-center gap-3 sm:flex-row">
             <ButtonLink href="/reservar" variant="accent" size="lg" className="shadow-floating">
-              Reservar mi asesoría
+              Reservá tu turno
             </ButtonLink>
             <a
               href={whatsappHref(whatsappNumber, "Hola, quiero saber más sobre la asesoría.")}

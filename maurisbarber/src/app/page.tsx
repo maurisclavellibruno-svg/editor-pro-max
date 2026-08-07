@@ -3,7 +3,6 @@ import { NextAvailabilityBanner } from "@/components/landing/NextAvailabilityBan
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ResultsGallery } from "@/components/landing/ResultsGallery";
-import { AboutMe } from "@/components/landing/AboutMe";
 import { ServicesPreview } from "@/components/landing/ServicesPreview";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { LeaveReview } from "@/components/landing/LeaveReview";
@@ -27,9 +26,8 @@ export default async function LandingPage() {
       <Hero name={shop.name} instagramHandle={shop.instagramHandle} whatsappNumber={shop.whatsappNumber} />
       <NextAvailabilityBanner />
       <TrustBadges />
-      <HowItWorks />
       <ResultsGallery />
-      <AboutMe />
+      <HowItWorks />
       <ServicesPreview
         services={services.map((s) => ({
           id: s.id,

@@ -3,8 +3,13 @@ FROM node:22-slim AS base
 # which recent Alpine releases no longer ship, causing
 # "Error loading shared library libssl.so.1.1" at runtime. Debian avoids that
 # whole class of issues.
-RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates tzdata \
   && rm -rf /var/lib/apt/lists/*
+# Every date the app constructs (bookings, availability, reminders) assumes
+# this is the process's local timezone — see src/lib/time.ts. Without it the
+# container defaults to UTC, so a booking made for "15:30" gets stored as
+# 15:30 UTC (18:30 Montevideo) instead of 15:30 Montevideo (18:30 UTC).
+ENV TZ=America/Montevideo
 
 FROM base AS deps
 WORKDIR /app

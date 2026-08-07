@@ -199,3 +199,16 @@ docker run -d --name maurisbarber --env-file .env -p 3000:3000 --network host --
 | `prisma migrate deploy` falla por conexión | Confirmá que `docker compose up -d postgres` esté corriendo (`docker ps`) y que `DATABASE_URL` use `localhost` (porque el contenedor de la app corre con `--network host`) |
 | Prisma dice "the URL must start with the protocol postgresql://" | Tu `.env` tiene valores entre comillas — `docker run --env-file` no las saca (a diferencia de Next.js en desarrollo). Sacá todas las comillas del archivo: `sed -i 's/"//g' .env` |
 | `curl -I http://localhost:3000` da "Failed to connect" pero `docker logs maurisbarber` dice "Ready" | Al servidor le falta `HOSTNAME=0.0.0.0` en el `.env` (ver nota en Paso 6) — sin eso, Next.js escucha solo en el hostname del VPS y no en todas las interfaces |
+| Las reservas aparecen en la agenda a una hora completamente distinta a la que se reservaron | La imagen Docker no tiene la zona horaria (`TZ=America/Montevideo`) horneada — reconstruí la imagen desde el commit que la agrega. Las reservas creadas ANTES del fix quedaron guardadas con la hora corrida y hay que corregirlas a mano (ver abajo) |
+
+### Corregir reservas guardadas con la hora corrida
+
+Si tenías reservas creadas antes de que la imagen incluyera `TZ=America/Montevideo`,
+quedaron guardadas 3 horas antes de lo real (porque el servidor asumía UTC en vez
+de hora de Montevideo). Después de reconstruir la imagen con el fix, corré esto
+una sola vez para corregir las reservas viejas — las nuevas ya se guardan bien:
+
+```bash
+docker exec -it maurisbarber-postgres-1 psql -U maurisbarber -d maurisbarber -c \
+  "UPDATE \"Booking\" SET \"startAt\" = \"startAt\" + interval '3 hours', \"endAt\" = \"endAt\" + interval '3 hours';"
+```

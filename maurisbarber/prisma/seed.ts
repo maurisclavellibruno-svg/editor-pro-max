@@ -28,8 +28,8 @@ async function main() {
     await prisma.barbershop.create({
       data: {
         name: "MaurisBarber",
-        phone: "091 552 626",
-        whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "59891552626",
+        phone: "098 341 762",
+        whatsappNumber: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "59898341762",
         instagramHandle: "maurisbarber",
         address: "Av. Gonzalo Ramírez 1686 Apto. 002, Montevideo, Uruguay",
         mapsEmbedUrl:

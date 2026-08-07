@@ -89,7 +89,7 @@ SMTP_PASSWORD=re_tu_api_key
 SMTP_FROM_EMAIL=no-reply@maurisbarber.com         # o onboarding@resend.dev si todavía no verificaste el dominio
 NOTIFICATION_EMAIL=mauris@maurisbarber.com        # a dónde te llegan los avisos de nuevas reservas
 
-NEXT_PUBLIC_WHATSAPP_NUMBER=59891552626
+NEXT_PUBLIC_WHATSAPP_NUMBER=59898341762
 ```
 
 El resto de las variables (recordatorios, integraciones opcionales) podés

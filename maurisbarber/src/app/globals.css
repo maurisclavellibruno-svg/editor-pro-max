@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-display: "Inter", system-ui, sans-serif;
-}
-
 html {
   scroll-behavior: smooth;
 }
@@ -19,4 +14,62 @@ body {
 ::selection {
   background: #dcfce7;
   color: #111111;
+}
+
+/* Subtle film-grain texture for dark sections — adds depth without a flat
+   gradient-only look. Cheap: a tiny inline SVG noise filter, tiled. */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Scroll-reveal: see components/ui/Reveal.tsx */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Continuous marquee loop — see components/landing/Marquee.tsx */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee-scroll 22s linear infinite;
+}
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.custom-cursor {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none;
+  }
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    cursor: auto;
+  }
+  .custom-cursor {
+    display: block;
+  }
 }

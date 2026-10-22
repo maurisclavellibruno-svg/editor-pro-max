@@ -10,26 +10,31 @@ interface HeroProps {
 
 export function Hero({ name, instagramHandle, whatsappNumber }: HeroProps) {
   return (
-    <section className="relative overflow-hidden bg-surface-dark px-6 pb-20 pt-28 text-white sm:pb-28 sm:pt-36">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(22,163,74,0.18),transparent_60%)]" />
+    <section className="grain relative overflow-hidden bg-surface-dark px-6 pb-20 pt-28 text-white sm:pb-28 sm:pt-36">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(22,163,74,0.22),transparent_60%)]" />
       <div className="relative mx-auto grid max-w-5xl items-center gap-12 sm:grid-cols-[1.1fr_0.9fr] sm:gap-10">
         <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
           <span className="animate-fade-in rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-white/70">
             {name} · @{instagramHandle}
           </span>
-          <h1 className="mt-6 animate-rise-in text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">
-            No elijas un corte al azar.
-            <br />
-            Elegí el que realmente te favorece.
+          <h1 className="mt-6 font-display text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+            <span className="block animate-rise-in [animation-delay:60ms]">No elijas un corte</span>
+            <span className="block animate-rise-in [animation-delay:160ms]">al azar.</span>
+            <span className="block animate-rise-in text-accent [animation-delay:260ms]">
+              Elegí el que te favorece.
+            </span>
           </h1>
-          <p className="mt-5 max-w-xl animate-rise-in text-lg text-white/60 sm:text-xl">
+          <p className="mt-6 max-w-xl animate-rise-in text-lg text-white/60 [animation-delay:380ms] sm:text-xl">
             Analizamos la forma de tu rostro, tus facciones, tu estilo de vida y lo que buscás
             transmitir para recomendarte el corte que mejor funciona para vos.
           </p>
-          <div className="mt-10 flex animate-rise-in flex-col items-center gap-3 sm:flex-row">
-            <ButtonLink href="/reservar" variant="accent" size="lg" className="shadow-floating">
-              Reservá tu turno
-            </ButtonLink>
+          <div className="relative mt-10 flex animate-rise-in flex-col items-center gap-3 [animation-delay:480ms] sm:flex-row">
+            <div className="relative">
+              <span className="absolute -inset-2 animate-pulse-ring rounded-full bg-accent/40 blur-md" />
+              <ButtonLink href="/reservar" variant="accent" size="lg" className="relative shadow-floating">
+                Reservá tu turno
+              </ButtonLink>
+            </div>
             <a
               href={whatsappHref(whatsappNumber, "Hola, quiero saber más sobre la asesoría.")}
               target="_blank"
@@ -41,7 +46,7 @@ export function Hero({ name, instagramHandle, whatsappNumber }: HeroProps) {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-xs animate-rise-in sm:max-w-none">
+        <div className="relative mx-auto w-full max-w-xs animate-rise-in [animation-delay:200ms] sm:max-w-none">
           <div className="pointer-events-none absolute -inset-6 rounded-[2rem] bg-accent/20 blur-3xl" />
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-white/10 shadow-floating">
             <Image

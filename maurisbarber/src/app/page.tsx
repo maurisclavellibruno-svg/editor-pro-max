@@ -1,4 +1,5 @@
 import { Hero } from "@/components/landing/Hero";
+import { StickyBookBar } from "@/components/landing/StickyBookBar";
 import { NextAvailabilityBanner } from "@/components/landing/NextAvailabilityBanner";
 import { TrustBadges } from "@/components/landing/TrustBadges";
 import { HowItWorks } from "@/components/landing/HowItWorks";
@@ -23,6 +24,7 @@ export default async function LandingPage() {
 
   return (
     <main>
+      <StickyBookBar name={shop.name} />
       <Hero name={shop.name} instagramHandle={shop.instagramHandle} whatsappNumber={shop.whatsappNumber} />
       <NextAvailabilityBanner />
       <TrustBadges />

@@ -285,7 +285,10 @@ function Field({
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1.5 block font-medium text-ink-soft">{label}</span>
+      <span className="mb-1.5 block font-medium text-ink-soft">
+        {label}
+        {required && <span className="text-red-600"> *</span>}
+      </span>
       <input
         type={type}
         required={required}

@@ -55,21 +55,31 @@ export async function searchCustomers(query: string) {
   return withStats;
 }
 
-// Customers who've actually visited before (visitCount > 0) but haven't
-// been back in at least `minDays` — the win-back list for the admin panel.
+// Customers who've booked before (any status except CANCELLED — a booking
+// that was simply never marked COMPLETED by staff still counts) but haven't
+// booked again in at least `minDays` — the win-back list for the admin
+// panel. Deliberately NOT based on getCustomerStats' COMPLETED-only
+// lastVisitAt: staff rarely remembers to flip that status by hand, so that
+// number alone made almost everyone look "inactive forever".
 export async function getInactiveCustomers(minDays = 30) {
   const customers = await prisma.customer.findMany({ take: 300, orderBy: { updatedAt: "desc" } });
-  const withStats = await Promise.all(
-    customers.map(async (customer) => ({ ...customer, stats: await getCustomerStats(customer.id) })),
+  const withLastBooking = await Promise.all(
+    customers.map(async (customer) => {
+      const last = await prisma.booking.aggregate({
+        where: { customerId: customer.id, status: { not: "CANCELLED" } },
+        _max: { startAt: true },
+      });
+      return { ...customer, lastBookingAt: last._max.startAt };
+    }),
   );
 
   const now = Date.now();
   const DAY_MS = 24 * 60 * 60 * 1000;
-  return withStats
-    .filter((c) => c.stats.lastVisitAt && now - c.stats.lastVisitAt.getTime() >= minDays * DAY_MS)
+  return withLastBooking
+    .filter((c) => c.lastBookingAt && now - c.lastBookingAt.getTime() >= minDays * DAY_MS)
     .map((c) => ({
       ...c,
-      daysSinceLastVisit: Math.floor((now - c.stats.lastVisitAt!.getTime()) / DAY_MS),
+      daysSinceLastVisit: Math.floor((now - c.lastBookingAt!.getTime()) / DAY_MS),
     }))
     .sort((a, b) => b.daysSinceLastVisit - a.daysSinceLastVisit);
 }

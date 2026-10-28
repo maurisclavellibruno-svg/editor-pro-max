@@ -18,8 +18,8 @@ export default async function InactivosPage({
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-ink">Clientes inactivos</h1>
         <p className="mt-1 text-sm text-ink-muted">
-          Clientes que ya vinieron antes pero no volvieron en un tiempo. Ofreceles un descuento para
-          que vuelvan.
+          Clientes que ya se agendaron antes pero no volvieron a reservar en un tiempo. Ofreceles un
+          descuento para que vuelvan.
         </p>
       </div>
 
@@ -49,8 +49,8 @@ export default async function InactivosPage({
             <tr>
               <th className="px-5 py-3">Nombre</th>
               <th className="px-5 py-3">Teléfono</th>
-              <th className="px-5 py-3">Última visita</th>
-              <th className="px-5 py-3">Sin volver hace</th>
+              <th className="px-5 py-3">Último turno</th>
+              <th className="px-5 py-3">Sin reservar hace</th>
               <th className="px-5 py-3" />
             </tr>
           </thead>
@@ -64,7 +64,7 @@ export default async function InactivosPage({
                   </td>
                   <td className="px-5 py-3 text-ink-muted">{c.phone}</td>
                   <td className="px-5 py-3 text-ink-muted">
-                    {c.stats.lastVisitAt?.toLocaleDateString("es-UY")}
+                    {c.lastBookingAt?.toLocaleDateString("es-UY")}
                   </td>
                   <td className="px-5 py-3 font-medium text-ink">{c.daysSinceLastVisit} días</td>
                   <td className="px-5 py-3 text-right">

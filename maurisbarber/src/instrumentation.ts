@@ -22,4 +22,15 @@ export async function register() {
     },
     intervalMinutes * 60 * 1000,
   );
+
+  // Auto-completes bookings whose time has passed and were never marked by
+  // hand — see src/lib/autoComplete.ts for why.
+  setInterval(
+    () => {
+      fetch(`${baseUrl}/api/cron/auto-complete`, {
+        headers: secret ? { authorization: `Bearer ${secret}` } : undefined,
+      }).catch((err) => console.error("[auto-complete] scan failed", err));
+    },
+    intervalMinutes * 60 * 1000,
+  );
 }

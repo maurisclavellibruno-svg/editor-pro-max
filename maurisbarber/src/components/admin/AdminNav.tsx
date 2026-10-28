@@ -17,6 +17,7 @@ const links = [
   { href: "/admin/resenas", label: "Reseñas" },
   { href: "/admin/horarios", label: "Horarios" },
   { href: "/admin/estadisticas", label: "Estadísticas" },
+  { href: "/admin/configuracion", label: "Configuración" },
 ];
 
 export function AdminNav() {

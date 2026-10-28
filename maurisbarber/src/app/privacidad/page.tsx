@@ -52,7 +52,7 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="font-semibold text-ink">Contacto</h2>
-          <p className="mt-2">MaurisBarber — Montevideo, Uruguay. Teléfono: 098 341 762.</p>
+          <p className="mt-2">MaurisBarber — Montevideo, Uruguay. Teléfono: 091 552 626.</p>
         </section>
       </div>
     </main>

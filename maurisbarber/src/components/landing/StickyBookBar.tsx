@@ -23,17 +23,17 @@ export function StickyBookBar({ name }: StickyBookBarProps) {
 
   return (
     <div
-      className={`fixed inset-x-0 top-0 z-40 border-b border-line bg-white/85 backdrop-blur transition-transform duration-300 ease-out ${
+      className={`fixed inset-x-0 top-0 z-40 border-b border-gold/15 bg-noir/90 backdrop-blur transition-transform duration-300 ease-out ${
         visible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
-        <span className="font-display text-sm font-semibold tracking-tight text-ink">{name}</span>
+        <span className="font-display text-sm font-semibold tracking-tight text-ivory">{name}</span>
         <div className="flex items-center gap-4">
-          <a href="#faq" className="hidden text-sm font-medium text-ink-muted hover:text-ink sm:inline">
+          <a href="#faq" className="hidden text-sm font-medium text-ivory-soft hover:text-ivory sm:inline">
             ¿Dudas?
           </a>
-          <ButtonLink href="/reservar" variant="accent" size="sm">
+          <ButtonLink href="/reservar" variant="gold" size="sm">
             Reservá tu turno
           </ButtonLink>
         </div>

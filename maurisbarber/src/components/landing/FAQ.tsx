@@ -31,7 +31,7 @@ export function FAQ() {
 
   return (
     <Section id="faq" eyebrow="Preguntas frecuentes" title="¿Tenés dudas?">
-      <div className="mx-auto max-w-2xl divide-y divide-line rounded-2xl border border-line bg-white shadow-card">
+      <div className="mx-auto max-w-2xl divide-y divide-gold/15 rounded-2xl border border-gold/15 bg-noir-soft">
         {faqs.map((item, index) => {
           const isOpen = openIndex === index;
           return (
@@ -41,15 +41,15 @@ export function FAQ() {
                 onClick={() => setOpenIndex(isOpen ? null : index)}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="font-medium text-ink">{item.q}</span>
+                <span className="font-medium text-ivory">{item.q}</span>
                 <span
-                  className={`shrink-0 text-ink-muted transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
+                  className={`shrink-0 text-gold transition-transform duration-300 ${isOpen ? "rotate-45" : ""}`}
                 >
                   +
                 </span>
               </button>
               <div
-                className={`grid overflow-hidden px-6 text-ink-muted transition-all duration-300 ${
+                className={`grid overflow-hidden px-6 text-ivory-soft transition-all duration-300 ${
                   isOpen ? "grid-rows-[1fr] pb-5 opacity-100" : "grid-rows-[0fr] opacity-0"
                 }`}
                 style={{ display: "grid" }}

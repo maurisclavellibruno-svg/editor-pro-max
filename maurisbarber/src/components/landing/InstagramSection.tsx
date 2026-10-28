@@ -7,11 +7,11 @@ export function InstagramSection({ instagramHandle }: { instagramHandle: string 
       eyebrow="Instagram"
       title="Seguinos de cerca"
       subtitle="Mirá nuestros últimos trabajos y novedades."
-      className="bg-surface-alt text-center"
+      className="bg-noir-soft text-center"
     >
       <ButtonLink
         href={`https://instagram.com/${instagramHandle}`}
-        variant="outline"
+        variant="goldOutline"
         size="lg"
       >
         @{instagramHandle}

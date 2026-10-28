@@ -20,7 +20,7 @@ export function BeforeAfterSlider({
   const [position, setPosition] = useState(50);
 
   return (
-    <div className="relative aspect-[4/5] w-full select-none overflow-hidden rounded-2xl border border-line shadow-card">
+    <div className="relative aspect-[4/5] w-full select-none overflow-hidden rounded-2xl border border-gold/15">
       {/* Base layer: fully visible "after" photo. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

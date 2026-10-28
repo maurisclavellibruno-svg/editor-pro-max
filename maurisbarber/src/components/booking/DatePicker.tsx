@@ -34,8 +34,8 @@ export function DatePicker({ selectedDate, onSelect, daysAhead = 21 }: DatePicke
             onClick={() => onSelect(dateStr)}
             className={`flex min-w-[64px] shrink-0 flex-col items-center rounded-2xl border px-3 py-3 transition-colors ${
               isSelected
-                ? "border-accent bg-accent text-white"
-                : "border-line bg-white text-ink hover:border-ink/30"
+                ? "border-gold bg-gold text-noir"
+                : "border-gold/15 bg-noir-soft text-ivory hover:border-gold/40"
             }`}
           >
             <span className="text-xs uppercase opacity-70">{DAY_LABELS[date.getDay()]}</span>

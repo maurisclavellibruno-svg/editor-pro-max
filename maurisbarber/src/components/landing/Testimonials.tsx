@@ -37,22 +37,22 @@ export async function Testimonials() {
       id="testimonios"
       eyebrow="Testimonios"
       title="Lo que dicen nuestros clientes"
-      className="bg-surface-alt"
+      className="bg-noir-soft"
     >
       <div className="grid gap-4 sm:grid-cols-3">
         {testimonials.map((t) => (
           <blockquote
             key={t.name + t.quote}
-            className="rounded-2xl border border-line bg-white p-6 shadow-card"
+            className="rounded-2xl border border-gold/15 bg-noir p-6"
           >
             {t.rating && (
-              <p className="mb-2 text-accent" aria-label={`${t.rating} de 5 estrellas`}>
+              <p className="mb-2 text-gold" aria-label={`${t.rating} de 5 estrellas`}>
                 {"★".repeat(t.rating)}
-                <span className="text-line">{"★".repeat(5 - t.rating)}</span>
+                <span className="text-gold/20">{"★".repeat(5 - t.rating)}</span>
               </p>
             )}
-            <p className="text-ink-soft">&ldquo;{t.quote}&rdquo;</p>
-            <footer className="mt-4 text-sm font-medium text-ink-muted">— {t.name}</footer>
+            <p className="text-ivory-soft">&ldquo;{t.quote}&rdquo;</p>
+            <footer className="mt-4 text-sm font-medium text-ivory-soft">— {t.name}</footer>
           </blockquote>
         ))}
       </div>

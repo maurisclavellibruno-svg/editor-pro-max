@@ -59,6 +59,25 @@ body {
   display: none;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .animate-pulse-ring,
+  .animate-draw-line,
+  .animate-rise-in,
+  .animate-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   * {
     cursor: none;

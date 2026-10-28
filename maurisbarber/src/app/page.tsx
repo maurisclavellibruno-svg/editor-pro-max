@@ -45,7 +45,7 @@ export default async function LandingPage() {
       <HoursAndContact hours={hours} phone={shop.phone} address={shop.address} mapsEmbedUrl={shop.mapsEmbedUrl} />
       <InstagramSection instagramHandle={shop.instagramHandle} />
       <FAQ />
-      <footer className="border-t border-line bg-surface-dark py-10 text-center text-sm text-white/50">
+      <footer className="border-t border-gold/15 bg-noir py-10 text-center text-sm text-ivory-soft">
         © {new Date().getFullYear()} {shop.name}. Todos los derechos reservados.
       </footer>
       <WhatsAppButton whatsappNumber={shop.whatsappNumber} />

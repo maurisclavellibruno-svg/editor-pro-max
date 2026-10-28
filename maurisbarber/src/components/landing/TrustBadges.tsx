@@ -9,7 +9,7 @@ const badges = [
 
 export function TrustBadges() {
   return (
-    <div className="border-y border-line bg-surface-alt text-ink-soft">
+    <div className="border-y border-gold/15 bg-noir-soft text-ivory-soft">
       <Marquee items={badges} />
     </div>
   );

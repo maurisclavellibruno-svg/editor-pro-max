@@ -31,11 +31,11 @@ export async function NextAvailabilityBanner() {
   return (
     <Link
       href="/reservar"
-      className="flex items-center justify-center gap-2 border-y border-line bg-accent/10 px-6 py-3 text-center text-sm font-medium text-accent-hover transition-colors hover:bg-accent/15"
+      className="flex items-center justify-center gap-2 border-y border-gold/15 bg-noir px-6 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-noir-soft"
     >
       <span className="relative flex h-2 w-2 shrink-0">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-gold" />
       </span>
       Próximo turno disponible: {formatSlot(next.date, next.time)}
     </Link>

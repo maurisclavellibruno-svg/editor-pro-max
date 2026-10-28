@@ -9,6 +9,9 @@ const variants = {
   accent: "bg-accent text-white hover:bg-accent-hover shadow-card",
   outline: "border border-line bg-white text-ink hover:bg-surface-alt",
   ghost: "text-ink hover:bg-surface-alt",
+  // Public site only (landing + booking) — the premium black-and-gold variants.
+  gold: "bg-gold text-noir hover:bg-gold-light shadow-gold",
+  goldOutline: "border border-gold/40 text-gold hover:border-gold hover:bg-gold/10",
 };
 
 const sizes = {

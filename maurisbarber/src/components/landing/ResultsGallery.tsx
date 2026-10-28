@@ -27,7 +27,7 @@ export function ResultsGallery() {
       eyebrow="Resultados"
       title="Cambios reales, de nuestras asesorías"
       subtitle="Deslizá para ver la diferencia entre el antes y el después."
-      className="bg-surface-alt"
+      className="bg-noir-soft"
     >
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {results.map((result, i) => (

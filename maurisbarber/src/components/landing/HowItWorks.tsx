@@ -28,10 +28,15 @@ export function HowItWorks() {
     >
       <div className="grid gap-6 sm:grid-cols-3">
         {steps.map((step) => (
-          <div key={step.number} className="rounded-2xl border border-line bg-white p-6 shadow-card">
-            <span className="text-sm font-semibold text-accent">{step.number}</span>
-            <h3 className="mt-3 text-lg font-semibold text-ink">{step.title}</h3>
-            <p className="mt-2 text-sm text-ink-muted">{step.description}</p>
+          <div
+            key={step.number}
+            className="relative overflow-hidden rounded-2xl border border-gold/15 bg-noir-soft p-6 transition-colors hover:border-gold/35"
+          >
+            <span className="font-display absolute -right-2 -top-4 text-6xl font-bold text-gold/10">
+              {step.number}
+            </span>
+            <h3 className="relative font-display text-lg font-semibold text-ivory">{step.title}</h3>
+            <p className="relative mt-2 text-sm text-ivory-soft">{step.description}</p>
           </div>
         ))}
       </div>

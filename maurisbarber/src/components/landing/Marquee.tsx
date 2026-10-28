@@ -12,7 +12,7 @@ export function Marquee({ items, className = "" }: MarqueeProps) {
         {[...items, ...items].map((item, i) => (
           <span key={i} className="flex items-center gap-10 whitespace-nowrap text-sm font-medium">
             {item}
-            <span aria-hidden className="text-accent">
+            <span aria-hidden className="text-gold">
               ✦
             </span>
           </span>

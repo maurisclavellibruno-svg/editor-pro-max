@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { payWithGiftCard, payWithMembershipCredit, updateBookingPayment, updateBookingStatus } from "@/actions/admin-bookings";
 import { generatePaymentLink } from "@/actions/payments";
+import { normalizeUyPhone, whatsappHref } from "@/lib/whatsapp";
 
 export interface BookingEventProps {
   id: string;
@@ -123,6 +124,16 @@ export function BookingDetailModal({
     }
   }
 
+  const dateLabel = booking.start.toLocaleString("es-UY", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "America/Montevideo",
+  });
+  const firstName = booking.customerName.split(" ")[0];
+  const confirmationMessage = `Hola ${firstName}! Tu turno de ${booking.serviceName} en MaurisBarber quedó confirmado para el ${dateLabel}. Cualquier consulta, escribinos por acá.`;
+  const reminderMessage = `Hola ${firstName}! Te recordamos tu turno de ${booking.serviceName} hoy a las ${booking.start.toLocaleTimeString("es-UY", { timeStyle: "short", timeZone: "America/Montevideo" })} en MaurisBarber. Te esperamos.`;
+  const customerWhatsapp = normalizeUyPhone(booking.customerPhone);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-floating">
@@ -134,6 +145,25 @@ export function BookingDetailModal({
           <span className="rounded-full bg-surface-alt px-3 py-1 text-xs font-medium text-ink-soft">
             {STATUS_LABELS[booking.status]}
           </span>
+        </div>
+
+        <div className="mt-4 flex gap-2">
+          <a
+            href={whatsappHref(customerWhatsapp, confirmationMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 rounded-full bg-[#25D366] px-4 py-2 text-center text-sm font-medium text-white transition-transform hover:scale-[1.02]"
+          >
+            Confirmar por WhatsApp
+          </a>
+          <a
+            href={whatsappHref(customerWhatsapp, reminderMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 rounded-full border border-line px-4 py-2 text-center text-sm font-medium text-ink-soft transition-transform hover:scale-[1.02]"
+          >
+            Mandar recordatorio
+          </a>
         </div>
 
         <div className="mt-4 space-y-1 text-sm">

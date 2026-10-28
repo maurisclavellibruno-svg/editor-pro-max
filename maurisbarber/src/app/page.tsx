@@ -5,6 +5,7 @@ import { TrustBadges } from "@/components/landing/TrustBadges";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { ResultsGallery } from "@/components/landing/ResultsGallery";
 import { ServicesPreview } from "@/components/landing/ServicesPreview";
+import { LoyaltyCardBanner } from "@/components/landing/LoyaltyCardBanner";
 import { Testimonials } from "@/components/landing/Testimonials";
 import { LeaveReview } from "@/components/landing/LeaveReview";
 import { HoursAndContact } from "@/components/landing/HoursAndContact";
@@ -40,6 +41,7 @@ export default async function LandingPage() {
           color: s.color,
         }))}
       />
+      <LoyaltyCardBanner />
       <Testimonials />
       <LeaveReview />
       <HoursAndContact hours={hours} phone={shop.phone} address={shop.address} mapsEmbedUrl={shop.mapsEmbedUrl} />

@@ -147,6 +147,13 @@ model Customer {
   // POINTS_PER_100 in lib/loyalty.ts), redeemed manually by staff.
   loyaltyPoints Int @default(0)
 
+  // Punch-card loyalty club ("tarjeta de fidelidad"): customers opt in
+  // (public form or enrolled in person by staff), staff adds a stamp per
+  // visit, and the 6th stamp is a free cut — redeeming resets the count.
+  loyaltyCardEnrolled    Boolean @default(false)
+  loyaltyCardStamps      Int     @default(0)
+  loyaltyCardRedemptions Int     @default(0)
+
   bookings     Booking[]
   photos       CustomerPhoto[]
   productSales ProductSale[]

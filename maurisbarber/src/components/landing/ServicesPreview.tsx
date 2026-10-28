@@ -15,7 +15,7 @@ export function ServicesPreview({ services }: { services: Service[] }) {
     <Section
       id="servicios"
       eyebrow="Servicios"
-      title="Cada asesoría termina en uno de estos"
+      title="Elegí qué necesitás"
       subtitle="El punto de partida es siempre el mismo: entender tu rostro y tu estilo antes de tocar la tijera."
     >
       <div className="grid gap-4 sm:grid-cols-2">

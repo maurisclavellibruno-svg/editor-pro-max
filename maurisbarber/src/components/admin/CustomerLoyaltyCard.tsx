@@ -78,13 +78,17 @@ export function CustomerLoyaltyCard({
     }
   }
 
+  // Optimistic for the same reason as LoyaltyCardTable: this is a
+  // counter-side button, tapped with the client standing right there.
   async function handleAddStamp() {
+    const previous = stamps;
+    setStamps((s) => Math.min(s + 1, LOYALTY_CARD_GOAL));
     setCardSaving(true);
     setCardError(null);
     try {
       await addLoyaltyStamp(customerId);
-      setStamps((s) => Math.min(s + 1, LOYALTY_CARD_GOAL));
     } catch (err) {
+      setStamps(previous);
       setCardError(err instanceof Error ? err.message : "No se pudo sumar el sello");
     } finally {
       setCardSaving(false);
@@ -92,12 +96,14 @@ export function CustomerLoyaltyCard({
   }
 
   async function handleRemoveStamp() {
+    const previous = stamps;
+    setStamps((s) => Math.max(s - 1, 0));
     setCardSaving(true);
     setCardError(null);
     try {
       await removeLoyaltyStamp(customerId);
-      setStamps((s) => Math.max(s - 1, 0));
     } catch (err) {
+      setStamps(previous);
       setCardError(err instanceof Error ? err.message : "No se pudo quitar el sello");
     } finally {
       setCardSaving(false);
@@ -105,13 +111,17 @@ export function CustomerLoyaltyCard({
   }
 
   async function handleRedeemCard() {
+    const previousStamps = stamps;
+    const previousRedemptions = redemptions;
+    setStamps(0);
+    setRedemptions((r) => r + 1);
     setCardSaving(true);
     setCardError(null);
     try {
       await redeemLoyaltyCard(customerId);
-      setStamps(0);
-      setRedemptions((r) => r + 1);
     } catch (err) {
+      setStamps(previousStamps);
+      setRedemptions(previousRedemptions);
       setCardError(err instanceof Error ? err.message : "No se pudo canjear");
     } finally {
       setCardSaving(false);

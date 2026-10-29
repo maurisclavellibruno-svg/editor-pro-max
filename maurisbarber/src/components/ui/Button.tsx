@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, forwardRef } from "react";
 import Link from "next/link";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 ease-out hover:scale-[1.02] disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 active:scale-[0.98]";
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-200 ease-out hover:scale-[1.02] disabled:opacity-50 disabled:pointer-events-none disabled:hover:scale-100 active:scale-[0.98] active:duration-100";
 
 const variants = {
   primary: "bg-ink text-white hover:bg-black shadow-card",

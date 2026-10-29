@@ -64,16 +64,11 @@ const config: Config = {
           "0%, 100%": { opacity: "0.55", transform: "scale(1)" },
           "50%": { opacity: "0.9", transform: "scale(1.06)" },
         },
-        "draw-line": {
-          "0%": { strokeDashoffset: "1" },
-          "100%": { strokeDashoffset: "0" },
-        },
       },
       animation: {
         "rise-in": "rise-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both",
         "fade-in": "fade-in 0.4s ease-out both",
         "pulse-ring": "pulse-ring 2.4s ease-in-out infinite",
-        "draw-line": "draw-line 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.5s both",
       },
     },
   },

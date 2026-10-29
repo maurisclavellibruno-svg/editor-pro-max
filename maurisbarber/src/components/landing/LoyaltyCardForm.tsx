@@ -54,7 +54,7 @@ export function LoyaltyCardForm() {
             maxLength={80}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
-            className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold"
+            className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-noir"
           />
         </label>
         <label className="block text-sm">
@@ -65,7 +65,7 @@ export function LoyaltyCardForm() {
             maxLength={80}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
-            className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold"
+            className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-noir"
           />
         </label>
       </div>
@@ -77,7 +77,7 @@ export function LoyaltyCardForm() {
           required
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
-          className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold"
+          className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-noir"
         />
       </label>
 

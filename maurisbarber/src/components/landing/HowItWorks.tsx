@@ -35,7 +35,7 @@ export function HowItWorks() {
 
         <Reveal delay={120} className="mt-14 divide-y divide-gold/10 border-t border-gold/10">
           {steps.map((step) => (
-            <div key={step.title} className="flex flex-col gap-2 py-6 sm:flex-row sm:items-baseline sm:gap-10">
+            <div key={step.title} className="flex flex-col gap-2 py-6 sm:flex-row sm:items-start sm:gap-10">
               <h3 className="font-display shrink-0 text-xl font-semibold text-gold sm:w-80">{step.title}</h3>
               <p className="text-ivory-soft">{step.description}</p>
             </div>

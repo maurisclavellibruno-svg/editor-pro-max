@@ -24,7 +24,7 @@ export default async function LandingPage() {
   ]);
 
   return (
-    <main>
+    <main className="theme-dark">
       <StickyBookBar name={shop.name} />
       <Hero name={shop.name} instagramHandle={shop.instagramHandle} whatsappNumber={shop.whatsappNumber} />
       <NextAvailabilityBanner />

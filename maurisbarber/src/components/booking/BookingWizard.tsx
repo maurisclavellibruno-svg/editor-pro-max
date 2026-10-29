@@ -87,7 +87,7 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
   }
 
   return (
-    <div className="min-h-screen bg-noir">
+    <div className="theme-dark min-h-screen bg-noir">
       <div className="mx-auto max-w-xl px-6 py-16">
         <button
           type="button"
@@ -296,7 +296,7 @@ function Field({
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold"
+        className="w-full rounded-xl border border-gold/20 bg-noir-soft px-4 py-3 text-ivory outline-none transition-colors focus:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:ring-offset-2 focus-visible:ring-offset-noir"
       />
     </label>
   );

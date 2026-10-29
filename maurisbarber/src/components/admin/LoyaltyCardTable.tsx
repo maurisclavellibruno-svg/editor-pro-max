@@ -24,14 +24,21 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
+  // Optimistic: the dots update the instant you tap, before the server
+  // round-trip resolves — this is the button Mauris taps most, often with a
+  // client waiting right there, so any visible lag reads as "did that even
+  // register?" Roll back only if the server actually rejects it.
   async function handleAdd(id: string) {
+    const row = rows.find((r) => r.id === id);
+    if (!row) return;
+    const previous = row.loyaltyCardStamps;
+    update(id, { loyaltyCardStamps: Math.min(previous + 1, LOYALTY_CARD_GOAL) });
     setSavingId(id);
     setError(null);
     try {
       await addLoyaltyStamp(id);
-      const row = rows.find((r) => r.id === id);
-      if (row) update(id, { loyaltyCardStamps: Math.min(row.loyaltyCardStamps + 1, LOYALTY_CARD_GOAL) });
     } catch (err) {
+      update(id, { loyaltyCardStamps: previous });
       setError(err instanceof Error ? err.message : "No se pudo sumar el sello");
     } finally {
       setSavingId(null);
@@ -39,13 +46,16 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
   }
 
   async function handleRemove(id: string) {
+    const row = rows.find((r) => r.id === id);
+    if (!row) return;
+    const previous = row.loyaltyCardStamps;
+    update(id, { loyaltyCardStamps: Math.max(previous - 1, 0) });
     setSavingId(id);
     setError(null);
     try {
       await removeLoyaltyStamp(id);
-      const row = rows.find((r) => r.id === id);
-      if (row) update(id, { loyaltyCardStamps: Math.max(row.loyaltyCardStamps - 1, 0) });
     } catch (err) {
+      update(id, { loyaltyCardStamps: previous });
       setError(err instanceof Error ? err.message : "No se pudo quitar el sello");
     } finally {
       setSavingId(null);
@@ -53,13 +63,16 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
   }
 
   async function handleRedeem(id: string) {
+    const row = rows.find((r) => r.id === id);
+    if (!row) return;
+    const previous = row;
+    update(id, { loyaltyCardStamps: 0, loyaltyCardRedemptions: previous.loyaltyCardRedemptions + 1 });
     setSavingId(id);
     setError(null);
     try {
       await redeemLoyaltyCard(id);
-      const row = rows.find((r) => r.id === id);
-      if (row) update(id, { loyaltyCardStamps: 0, loyaltyCardRedemptions: row.loyaltyCardRedemptions + 1 });
     } catch (err) {
+      update(id, { loyaltyCardStamps: previous.loyaltyCardStamps, loyaltyCardRedemptions: previous.loyaltyCardRedemptions });
       setError(err instanceof Error ? err.message : "No se pudo canjear");
     } finally {
       setSavingId(null);

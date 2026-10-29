@@ -22,17 +22,13 @@ export function Hero({ name, instagramHandle, whatsappNumber }: HeroProps) {
             <span className="block animate-rise-in [animation-delay:160ms]">al azar.</span>
             <span className="block animate-rise-in [animation-delay:260ms]">Elegí el que te favorece.</span>
           </h1>
-          <svg
-            viewBox="0 0 220 12"
-            className="mt-3 h-3 w-40 animate-draw-line text-gold sm:w-48"
-            style={{ strokeDasharray: 1, strokeDashoffset: 1 }}
-            fill="none"
-          >
+          <svg viewBox="0 0 260 14" className="mt-3 h-3.5 w-48 text-gold sm:w-64" fill="none" aria-hidden="true">
             <path
-              d="M2 9 C 40 2, 90 10, 120 5 S 190 1, 218 6"
+              className="draw-line-path"
+              d="M2 10 C 50 2, 110 12, 150 5 S 230 1, 258 7"
               pathLength={1}
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
             />
           </svg>

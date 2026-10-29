@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function FidelidadPage() {
   return (
-    <main className="min-h-screen bg-noir px-6 py-20 text-ivory sm:py-28">
+    <main className="theme-dark min-h-screen bg-noir px-6 py-20 text-ivory sm:py-28">
       <div className="mx-auto max-w-2xl text-center">
         <Link href="/" className="text-sm font-medium text-ivory-soft hover:text-ivory">
           ← Volver al inicio

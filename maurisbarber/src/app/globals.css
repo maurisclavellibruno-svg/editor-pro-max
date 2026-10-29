@@ -28,6 +28,30 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Public dark pages (landing, /reservar, /fidelidad) — declared so native
+   browser chrome (scrollbar, form-control fallbacks) renders dark instead
+   of defaulting to light on an all-black page. Scoped to a class, not
+   :root, so the (light-themed) admin panel is unaffected. */
+.theme-dark {
+  color-scheme: dark;
+}
+
+/* Hero signature line — see components/landing/Hero.tsx. Kept as a real
+   stylesheet rule (not a Tailwind utility + inline style) so the
+   prefers-reduced-motion override below can reliably win: overriding an
+   inline style from a stylesheet needs !important and is easy to miss. */
+.draw-line-path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-line 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.5s both;
+}
+
+@keyframes draw-line {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Scroll-reveal: see components/ui/Reveal.tsx */
 .reveal {
   opacity: 0;
@@ -64,12 +88,15 @@ body {
     animation: none;
   }
   .animate-pulse-ring,
-  .animate-draw-line,
   .animate-rise-in,
   .animate-fade-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+  .draw-line-path {
+    animation: none;
+    stroke-dashoffset: 0;
   }
   .reveal {
     opacity: 1;

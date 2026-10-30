@@ -92,6 +92,27 @@ export async function getLoyaltyCardCustomers() {
   });
 }
 
+// Bookings for loyalty-enrolled customers whose time has passed and that
+// staff hasn't answered "¿vino hoy?" for yet — drives the admin check-in
+// prompt. Capped to a recent window so an old backlog (from before this
+// feature existed, or someone who just turned on loyalty) doesn't flood it.
+export async function getPendingLoyaltyCheckIns(limit = 20) {
+  const now = new Date();
+  const windowStart = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+  return prisma.booking.findMany({
+    where: {
+      status: { not: "CANCELLED" },
+      loyaltyPromptAnsweredAt: null,
+      endAt: { lt: now, gte: windowStart },
+      customer: { loyaltyCardEnrolled: true },
+    },
+    include: { customer: true, service: true },
+    orderBy: { endAt: "asc" },
+    take: limit,
+  });
+}
+
 export async function getCustomerDetail(customerId: string) {
   const customer = await prisma.customer.findUnique({
     where: { id: customerId },

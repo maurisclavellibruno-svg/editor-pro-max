@@ -11,7 +11,9 @@ export default async function FidelidadAdminPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-ink">Club de fidelidad</h1>
         <p className="mt-1 text-sm text-ink-muted">
-          Sumá un sello cada vez que un cliente del club viene a cortarse. Al sexto, el corte es gratis.
+          Sumá un sello cada vez que un cliente del club viene a cortarse. Al sexto, el corte es gratis
+          — pero tiene que juntar los primeros 5 dentro de los 2 meses desde el primero, si no se
+          reinicia.
         </p>
       </div>
       <LoyaltyCardTable
@@ -22,6 +24,7 @@ export default async function FidelidadAdminPage() {
           phone: m.phone,
           loyaltyCardStamps: m.loyaltyCardStamps,
           loyaltyCardRedemptions: m.loyaltyCardRedemptions,
+          loyaltyCardCycleStartedAt: m.loyaltyCardCycleStartedAt?.toISOString() ?? null,
         }))}
       />
     </div>

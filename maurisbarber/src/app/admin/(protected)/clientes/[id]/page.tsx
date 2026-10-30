@@ -72,6 +72,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         loyaltyCardEnrolled={customer.loyaltyCardEnrolled}
         loyaltyCardStamps={customer.loyaltyCardStamps}
         loyaltyCardRedemptions={customer.loyaltyCardRedemptions}
+        loyaltyCardCycleStartedAt={customer.loyaltyCardCycleStartedAt?.toISOString() ?? null}
         memberships={customer.memberships.map((m) => ({
           id: m.id,
           planName: m.plan.name,

@@ -14,23 +14,23 @@ export async function register() {
   const baseUrl = process.env.NEXTAUTH_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
   const secret = process.env.CRON_SECRET;
 
-  setInterval(
-    () => {
-      fetch(`${baseUrl}/api/cron/reminders`, {
-        headers: secret ? { authorization: `Bearer ${secret}` } : undefined,
-      }).catch((err) => console.error("[reminders] scan failed", err));
-    },
-    intervalMinutes * 60 * 1000,
-  );
+  // All on the same cadence — each one is a cheap scan, so there's no
+  // reason to stagger them.
+  const endpoints = [
+    "reminders", // upcoming-booking reminder emails
+    "auto-complete", // marks past bookings COMPLETED — see src/lib/autoComplete.ts
+    "expire-loyalty", // resets stale loyalty-card cycles — see src/lib/loyaltyCardExpiry.ts
+    "review-requests", // post-visit "leave us a review" emails — see src/lib/reviewRequests.ts
+  ];
 
-  // Auto-completes bookings whose time has passed and were never marked by
-  // hand — see src/lib/autoComplete.ts for why.
-  setInterval(
-    () => {
-      fetch(`${baseUrl}/api/cron/auto-complete`, {
-        headers: secret ? { authorization: `Bearer ${secret}` } : undefined,
-      }).catch((err) => console.error("[auto-complete] scan failed", err));
-    },
-    intervalMinutes * 60 * 1000,
-  );
+  for (const endpoint of endpoints) {
+    setInterval(
+      () => {
+        fetch(`${baseUrl}/api/cron/${endpoint}`, {
+          headers: secret ? { authorization: `Bearer ${secret}` } : undefined,
+        }).catch((err) => console.error(`[${endpoint}] scan failed`, err));
+      },
+      intervalMinutes * 60 * 1000,
+    );
+  }
 }

@@ -13,6 +13,13 @@ export const createBookingSchema = z.object({
     .min(6, "Ingresá un teléfono válido")
     .max(20),
   email: z.string().trim().email("Email inválido").optional().or(z.literal("")),
+  // Sent as the literal string "true"/"false" by the checkbox in
+  // BookingWizard — NOT z.coerce.boolean(), which would treat the string
+  // "false" as truthy (any non-empty string coerces to true).
+  joinLoyaltyCard: z
+    .string()
+    .optional()
+    .transform((v) => v === "true"),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;

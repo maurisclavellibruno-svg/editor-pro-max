@@ -31,6 +31,7 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     lastName: formData.get("lastName"),
     phone: formData.get("phone"),
     email: formData.get("email"),
+    joinLoyaltyCard: formData.get("joinLoyaltyCard"),
   };
 
   const parsed = createBookingSchema.safeParse(raw);
@@ -63,12 +64,16 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email || undefined,
+      // Only ever turns this on here — unchecking the box on a later
+      // booking shouldn't silently un-enroll someone already in the club.
+      ...(data.joinLoyaltyCard ? { loyaltyCardEnrolled: true } : {}),
     },
     create: {
       firstName: data.firstName,
       lastName: data.lastName,
       phone: data.phone,
       email: data.email || undefined,
+      loyaltyCardEnrolled: data.joinLoyaltyCard,
     },
   });
 

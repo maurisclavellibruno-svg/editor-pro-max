@@ -148,11 +148,16 @@ model Customer {
   loyaltyPoints Int @default(0)
 
   // Punch-card loyalty club ("tarjeta de fidelidad"): customers opt in
-  // (public form or enrolled in person by staff), staff adds a stamp per
-  // visit, and the 6th stamp is a free cut — redeeming resets the count.
-  loyaltyCardEnrolled    Boolean @default(false)
-  loyaltyCardStamps      Int     @default(0)
-  loyaltyCardRedemptions Int     @default(0)
+  // (public form, the booking form, or enrolled in person by staff), staff
+  // adds a stamp per visit, and the 6th stamp is a free cut — redeeming
+  // resets the count. Stamps 1-5 must happen within LOYALTY_CARD_WINDOW_DAYS
+  // of the first one (see lib/loyaltyCard.ts) or the cycle resets to 0 —
+  // the whole point is to pull visits closer together, not just reward
+  // whenever someone eventually comes back.
+  loyaltyCardEnrolled       Boolean   @default(false)
+  loyaltyCardStamps         Int       @default(0)
+  loyaltyCardRedemptions    Int       @default(0)
+  loyaltyCardCycleStartedAt DateTime?
 
   bookings     Booking[]
   photos       CustomerPhoto[]
@@ -231,6 +236,15 @@ model Booking {
   // Set once loyalty points have been credited for this booking's payment,
   // so toggling paymentStatus back and forth never awards points twice.
   pointsAwarded Boolean @default(false)
+
+  // Set once staff answers the "¿vino hoy?" loyalty check-in prompt for
+  // this booking (Sí or No), so it stops showing up in the admin panel.
+  // Only asked for customers enrolled in the loyalty card.
+  loyaltyPromptAnsweredAt DateTime?
+
+  // Set once the "¿nos dejás una reseña?" email has gone out, so the scan
+  // never sends it twice for the same booking.
+  reviewRequestSentAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

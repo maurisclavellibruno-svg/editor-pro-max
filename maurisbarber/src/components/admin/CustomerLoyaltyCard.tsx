@@ -9,7 +9,7 @@ import {
   redeemLoyaltyCard,
   removeLoyaltyStamp,
 } from "@/actions/loyaltyCard";
-import { LOYALTY_CARD_GOAL } from "@/lib/loyaltyCard";
+import { LOYALTY_CARD_GOAL, LOYALTY_CARD_WINDOW_DAYS } from "@/lib/loyaltyCard";
 
 interface Membership {
   id: string;
@@ -29,6 +29,7 @@ export function CustomerLoyaltyCard({
   loyaltyCardEnrolled,
   loyaltyCardStamps,
   loyaltyCardRedemptions,
+  loyaltyCardCycleStartedAt,
   memberships,
   giftCards,
 }: {
@@ -37,6 +38,7 @@ export function CustomerLoyaltyCard({
   loyaltyCardEnrolled: boolean;
   loyaltyCardStamps: number;
   loyaltyCardRedemptions: number;
+  loyaltyCardCycleStartedAt: string | null;
   memberships: Membership[];
   giftCards: GiftCard[];
 }) {
@@ -48,6 +50,7 @@ export function CustomerLoyaltyCard({
   const [enrolled, setEnrolled] = useState(loyaltyCardEnrolled);
   const [stamps, setStamps] = useState(loyaltyCardStamps);
   const [redemptions, setRedemptions] = useState(loyaltyCardRedemptions);
+  const [cycleStartedAt, setCycleStartedAt] = useState(loyaltyCardCycleStartedAt);
   const [cardSaving, setCardSaving] = useState(false);
   const [cardError, setCardError] = useState<string | null>(null);
 
@@ -81,14 +84,17 @@ export function CustomerLoyaltyCard({
   // Optimistic for the same reason as LoyaltyCardTable: this is a
   // counter-side button, tapped with the client standing right there.
   async function handleAddStamp() {
-    const previous = stamps;
+    const previousStamps = stamps;
+    const previousCycleStartedAt = cycleStartedAt;
     setStamps((s) => Math.min(s + 1, LOYALTY_CARD_GOAL));
+    if (previousStamps === 0) setCycleStartedAt(new Date().toISOString());
     setCardSaving(true);
     setCardError(null);
     try {
       await addLoyaltyStamp(customerId);
     } catch (err) {
-      setStamps(previous);
+      setStamps(previousStamps);
+      setCycleStartedAt(previousCycleStartedAt);
       setCardError(err instanceof Error ? err.message : "No se pudo sumar el sello");
     } finally {
       setCardSaving(false);
@@ -96,14 +102,18 @@ export function CustomerLoyaltyCard({
   }
 
   async function handleRemoveStamp() {
-    const previous = stamps;
-    setStamps((s) => Math.max(s - 1, 0));
+    const previousStamps = stamps;
+    const previousCycleStartedAt = cycleStartedAt;
+    const newStamps = Math.max(stamps - 1, 0);
+    setStamps(newStamps);
+    if (newStamps === 0) setCycleStartedAt(null);
     setCardSaving(true);
     setCardError(null);
     try {
       await removeLoyaltyStamp(customerId);
     } catch (err) {
-      setStamps(previous);
+      setStamps(previousStamps);
+      setCycleStartedAt(previousCycleStartedAt);
       setCardError(err instanceof Error ? err.message : "No se pudo quitar el sello");
     } finally {
       setCardSaving(false);
@@ -113,7 +123,9 @@ export function CustomerLoyaltyCard({
   async function handleRedeemCard() {
     const previousStamps = stamps;
     const previousRedemptions = redemptions;
+    const previousCycleStartedAt = cycleStartedAt;
     setStamps(0);
+    setCycleStartedAt(null);
     setRedemptions((r) => r + 1);
     setCardSaving(true);
     setCardError(null);
@@ -122,11 +134,17 @@ export function CustomerLoyaltyCard({
     } catch (err) {
       setStamps(previousStamps);
       setRedemptions(previousRedemptions);
+      setCycleStartedAt(previousCycleStartedAt);
       setCardError(err instanceof Error ? err.message : "No se pudo canjear");
     } finally {
       setCardSaving(false);
     }
   }
+
+  const cycleDeadline =
+    cycleStartedAt && stamps > 0 && stamps < LOYALTY_CARD_GOAL
+      ? new Date(new Date(cycleStartedAt).getTime() + LOYALTY_CARD_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+      : null;
 
   return (
     <section className="rounded-2xl border border-line bg-white p-6 shadow-card">
@@ -176,6 +194,11 @@ export function CustomerLoyaltyCard({
                 {stamps}/{LOYALTY_CARD_GOAL}
               </span>
             </div>
+            {cycleDeadline && (
+              <p className="mt-1.5 text-xs text-ink-muted">
+                Si no vuelve antes del {cycleDeadline.toLocaleDateString("es-UY")}, pierde los sellos.
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button size="sm" variant="outline" disabled={cardSaving || stamps >= LOYALTY_CARD_GOAL} onClick={handleAddStamp}>
                 +1 sello

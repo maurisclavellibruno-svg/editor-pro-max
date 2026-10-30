@@ -36,6 +36,11 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  // Checked by default — opt-out, not opt-in. The club was going mostly
+  // unnoticed as a passive banner; this is the highest-intent moment to
+  // offer it (they're already booking), and it's a free, visible,
+  // easy-to-uncheck toggle, not a dark pattern.
+  const [joinLoyaltyCard, setJoinLoyaltyCard] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +73,7 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
     formData.set("lastName", lastName);
     formData.set("phone", phone);
     formData.set("email", email);
+    formData.set("joinLoyaltyCard", String(joinLoyaltyCard));
 
     let result;
     try {
@@ -217,6 +223,20 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
             </div>
             <Field label="Teléfono" value={phone} onChange={setPhone} required type="tel" />
             <Field label="Email (opcional)" value={email} onChange={setEmail} type="email" />
+
+            <label className="flex items-start gap-3 rounded-xl border border-gold/20 bg-noir-soft p-4 text-sm">
+              <input
+                type="checkbox"
+                checked={joinLoyaltyCard}
+                onChange={(e) => setJoinLoyaltyCard(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-gold"
+              />
+              <span className="text-ivory-soft">
+                <span className="font-medium text-ivory">Sumarme al club MaurisBarber</span> — cada 6
+                cortes, el 6to es gratis.
+              </span>
+            </label>
+
             {error && <p className="text-sm text-red-600">{error}</p>}
             <Button type="submit" variant="gold" size="lg" className="w-full" disabled={submitting}>
               {submitting ? "Confirmando…" : "Confirmar reserva"}
@@ -234,6 +254,9 @@ export function BookingWizard({ services, employees }: { services: Service[]; em
             <p className="mt-2 text-ivory-soft">
               Te esperamos el {date} a las {time} para tu {selectedService?.name}.
             </p>
+            {joinLoyaltyCard && (
+              <p className="mt-2 text-sm text-gold">Ya quedaste sumado al club MaurisBarber ✓</p>
+            )}
             <Button variant="goldOutline" size="md" className="mt-8" onClick={() => router.push("/")}>
               Volver al inicio
             </Button>

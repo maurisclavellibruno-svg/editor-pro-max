@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { joinLoyaltyCard } from "@/actions/loyaltyCard";
+import { LOYALTY_CARD_WINDOW_DAYS } from "@/lib/loyaltyCard";
 
 export function LoyaltyCardForm() {
   const [firstName, setFirstName] = useState("");
@@ -37,7 +38,9 @@ export function LoyaltyCardForm() {
       <div className="mx-auto max-w-md rounded-2xl border border-gold/15 bg-noir p-8 text-center">
         <p className="font-display text-lg font-semibold text-ivory">¡Ya sos parte del club!</p>
         <p className="mt-2 text-ivory-soft">
-          Te vamos a ir sumando un sello en cada visita. Al sexto, el corte es gratis.
+          Te vamos a ir sumando un sello en cada visita. Al sexto, el corte es gratis — juntá los
+          primeros 5 dentro de {Math.round(LOYALTY_CARD_WINDOW_DAYS / 30)} meses para no perder el
+          progreso.
         </p>
       </div>
     );

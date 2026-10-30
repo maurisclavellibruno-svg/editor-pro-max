@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { addLoyaltyStamp, redeemLoyaltyCard, removeLoyaltyStamp } from "@/actions/loyaltyCard";
-import { LOYALTY_CARD_GOAL } from "@/lib/loyaltyCard";
+import { LOYALTY_CARD_GOAL, LOYALTY_CARD_WINDOW_DAYS } from "@/lib/loyaltyCard";
 
 interface Member {
   id: string;
@@ -13,6 +13,7 @@ interface Member {
   phone: string;
   loyaltyCardStamps: number;
   loyaltyCardRedemptions: number;
+  loyaltyCardCycleStartedAt: string | null;
 }
 
 export function LoyaltyCardTable({ members }: { members: Member[] }) {
@@ -31,14 +32,18 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
   async function handleAdd(id: string) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
-    const previous = row.loyaltyCardStamps;
-    update(id, { loyaltyCardStamps: Math.min(previous + 1, LOYALTY_CARD_GOAL) });
+    const previous = row;
+    update(id, {
+      loyaltyCardStamps: Math.min(previous.loyaltyCardStamps + 1, LOYALTY_CARD_GOAL),
+      loyaltyCardCycleStartedAt:
+        previous.loyaltyCardStamps === 0 ? new Date().toISOString() : previous.loyaltyCardCycleStartedAt,
+    });
     setSavingId(id);
     setError(null);
     try {
       await addLoyaltyStamp(id);
     } catch (err) {
-      update(id, { loyaltyCardStamps: previous });
+      update(id, { loyaltyCardStamps: previous.loyaltyCardStamps, loyaltyCardCycleStartedAt: previous.loyaltyCardCycleStartedAt });
       setError(err instanceof Error ? err.message : "No se pudo sumar el sello");
     } finally {
       setSavingId(null);
@@ -48,14 +53,15 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
   async function handleRemove(id: string) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
-    const previous = row.loyaltyCardStamps;
-    update(id, { loyaltyCardStamps: Math.max(previous - 1, 0) });
+    const previous = row;
+    const newStamps = Math.max(previous.loyaltyCardStamps - 1, 0);
+    update(id, { loyaltyCardStamps: newStamps, loyaltyCardCycleStartedAt: newStamps === 0 ? null : previous.loyaltyCardCycleStartedAt });
     setSavingId(id);
     setError(null);
     try {
       await removeLoyaltyStamp(id);
     } catch (err) {
-      update(id, { loyaltyCardStamps: previous });
+      update(id, { loyaltyCardStamps: previous.loyaltyCardStamps, loyaltyCardCycleStartedAt: previous.loyaltyCardCycleStartedAt });
       setError(err instanceof Error ? err.message : "No se pudo quitar el sello");
     } finally {
       setSavingId(null);
@@ -66,17 +72,32 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
     const previous = row;
-    update(id, { loyaltyCardStamps: 0, loyaltyCardRedemptions: previous.loyaltyCardRedemptions + 1 });
+    update(id, {
+      loyaltyCardStamps: 0,
+      loyaltyCardCycleStartedAt: null,
+      loyaltyCardRedemptions: previous.loyaltyCardRedemptions + 1,
+    });
     setSavingId(id);
     setError(null);
     try {
       await redeemLoyaltyCard(id);
     } catch (err) {
-      update(id, { loyaltyCardStamps: previous.loyaltyCardStamps, loyaltyCardRedemptions: previous.loyaltyCardRedemptions });
+      update(id, {
+        loyaltyCardStamps: previous.loyaltyCardStamps,
+        loyaltyCardCycleStartedAt: previous.loyaltyCardCycleStartedAt,
+        loyaltyCardRedemptions: previous.loyaltyCardRedemptions,
+      });
       setError(err instanceof Error ? err.message : "No se pudo canjear");
     } finally {
       setSavingId(null);
     }
+  }
+
+  function cycleDeadline(m: Member): Date | null {
+    if (!m.loyaltyCardCycleStartedAt || m.loyaltyCardStamps === 0 || m.loyaltyCardStamps >= LOYALTY_CARD_GOAL) {
+      return null;
+    }
+    return new Date(new Date(m.loyaltyCardCycleStartedAt).getTime() + LOYALTY_CARD_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   }
 
   return (
@@ -114,6 +135,11 @@ export function LoyaltyCardTable({ members }: { members: Member[] }) {
                       {m.loyaltyCardStamps}/{LOYALTY_CARD_GOAL}
                     </span>
                   </div>
+                  {cycleDeadline(m) && (
+                    <p className="mt-1 text-xs text-ink-muted">
+                      Vence {cycleDeadline(m)!.toLocaleDateString("es-UY")}
+                    </p>
+                  )}
                 </td>
                 <td className="px-5 py-3 text-right">
                   <div className="flex justify-end gap-2">

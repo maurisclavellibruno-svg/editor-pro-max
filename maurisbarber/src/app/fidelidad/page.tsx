@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoyaltyCardForm } from "@/components/landing/LoyaltyCardForm";
-import { LOYALTY_CARD_GOAL } from "@/lib/loyaltyCard";
+import { LOYALTY_CARD_GOAL, LOYALTY_CARD_WINDOW_DAYS } from "@/lib/loyaltyCard";
 
 export const metadata: Metadata = {
   title: "Club de fidelidad — MaurisBarber",
@@ -21,6 +21,10 @@ export default function FidelidadPage() {
         <p className="mt-4 text-lg text-ivory-soft">
           Dejá tus datos una sola vez. En cada visita te sumamos un sello, y al corte número{" "}
           {LOYALTY_CARD_GOAL} te invitamos nosotros.
+        </p>
+        <p className="mt-2 text-sm text-ivory-soft/80">
+          Eso sí: los primeros {LOYALTY_CARD_GOAL - 1} tienen que ser dentro de{" "}
+          {Math.round(LOYALTY_CARD_WINDOW_DAYS / 30)} meses desde el primero, o se reinicia el contador.
         </p>
       </div>
 

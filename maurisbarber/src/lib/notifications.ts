@@ -12,11 +12,19 @@ export interface BookingNotificationPayload {
 // Notification delivery is abstracted behind this interface so a future
 // WhatsApp Business API integration can be dropped in without touching the
 // booking flow that calls it.
+export interface ReviewRequestPayload {
+  customerName: string;
+  customerEmail: string;
+  serviceName: string;
+  alreadyInLoyaltyClub: boolean;
+}
+
 interface NotificationProvider {
   notifyAdminNewBooking(payload: BookingNotificationPayload): Promise<void>;
   notifyCustomerConfirmation(payload: BookingNotificationPayload): Promise<void>;
   notifyCustomerReminder(payload: BookingNotificationPayload): Promise<void>;
   notifyCancellation(payload: BookingNotificationPayload): Promise<void>;
+  notifyReviewRequest(payload: ReviewRequestPayload): Promise<void>;
 }
 
 class EmailNotificationProvider implements NotificationProvider {
@@ -58,6 +66,28 @@ class EmailNotificationProvider implements NotificationProvider {
     if (payload.customerEmail) {
       await this.send(payload.customerEmail, "Tu turno en MaurisBarber fue cancelado", body);
     }
+  }
+
+  async notifyReviewRequest(payload: ReviewRequestPayload): Promise<void> {
+    const baseUrl = (process.env.NEXTAUTH_URL ?? "https://maurisbarber.tech").replace(/\/$/, "");
+    const firstName = payload.customerName.split(" ")[0];
+    const subject = "¿Cómo te fue en MaurisBarber?";
+    const lines = [
+      `Hola ${firstName}!`,
+      "",
+      `Esperamos que hayas salido conforme de tu ${payload.serviceName.toLowerCase()}.`,
+      "Nos ayudaría mucho que nos dejes una reseña contándonos qué te pareció y qué podríamos mejorar:",
+      `${baseUrl}/#dejar-resena`,
+    ];
+    if (!payload.alreadyInLoyaltyClub) {
+      lines.push(
+        "",
+        `De paso, ¿sabías que tenemos un club de fidelidad? Cada 6 cortes, el 6to te lo invitamos nosotros:`,
+        `${baseUrl}/fidelidad`,
+      );
+    }
+    lines.push("", "Gracias por elegirnos — MaurisBarber");
+    await this.send(payload.customerEmail, subject, lines.join("\n"));
   }
 
   // Never throws — a booking must succeed for the customer even if the

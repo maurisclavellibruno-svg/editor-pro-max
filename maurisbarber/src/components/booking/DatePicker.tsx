@@ -13,9 +13,20 @@ interface DatePickerProps {
   selectedDate: string | null;
   onSelect: (date: string) => void;
   daysAhead?: number;
+  /** Dates ("YYYY-MM-DD") to show grayed out and non-clickable — closed days
+   * or days with zero free slots. */
+  disabledDates?: Set<string>;
+  /** True while `disabledDates` is still loading — disables nothing yet. */
+  loadingDisabled?: boolean;
 }
 
-export function DatePicker({ selectedDate, onSelect, daysAhead = 21 }: DatePickerProps) {
+export function DatePicker({
+  selectedDate,
+  onSelect,
+  daysAhead = 21,
+  disabledDates,
+  loadingDisabled,
+}: DatePickerProps) {
   const days = Array.from({ length: daysAhead }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() + i);
@@ -27,15 +38,19 @@ export function DatePicker({ selectedDate, onSelect, daysAhead = 21 }: DatePicke
       {days.map((date) => {
         const dateStr = toDateStr(date);
         const isSelected = dateStr === selectedDate;
+        const isDisabled = !loadingDisabled && disabledDates?.has(dateStr);
         return (
           <button
             key={dateStr}
             type="button"
+            disabled={isDisabled}
             onClick={() => onSelect(dateStr)}
             className={`flex min-w-[64px] shrink-0 flex-col items-center rounded-2xl border px-3 py-3 transition-colors ${
-              isSelected
-                ? "border-gold bg-gold text-noir"
-                : "border-gold/15 bg-noir-soft text-ivory hover:border-gold/40"
+              isDisabled
+                ? "cursor-not-allowed border-ivory/5 bg-noir-soft text-ivory-soft/30"
+                : isSelected
+                  ? "border-gold bg-gold text-noir"
+                  : "border-gold/15 bg-noir-soft text-ivory hover:border-gold/40"
             }`}
           >
             <span className="text-xs uppercase opacity-70">{DAY_LABELS[date.getDay()]}</span>

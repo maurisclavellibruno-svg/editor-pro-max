@@ -88,7 +88,7 @@ async function getAvailableSlotsForEmployee(
   const isToday = isTodayStr(date);
 
   return candidateStarts
-    .filter((startMin) => startMin + duration <= closeMin)
+    .filter((startMin) => startMin >= openMin && startMin + duration <= closeMin)
     .filter((startMin) => {
       const endMin = startMin + duration;
       const overlapsBreak = breaks.some((brk) =>
@@ -201,6 +201,29 @@ export async function getNextAvailableSlot(maxDaysAhead = 14): Promise<{ date: s
     }
   }
   return null;
+}
+
+const WEEKDAYS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+// Short "hoy 19:30" / "mañana 15:00" / "el jueves 19 15:00" label for the
+// hero's trust line — see getNextAvailableSlot.
+export function formatNextSlotLabel(dateStr: string, time: string): string {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+
+  const today = new Date();
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const isToday =
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate();
+  const isTomorrow =
+    date.getFullYear() === tomorrow.getFullYear() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getDate() === tomorrow.getDate();
+
+  const when = isToday ? "hoy" : isTomorrow ? "mañana" : `el ${WEEKDAYS_ES[date.getDay()]} ${day}`;
+  return `${when} ${time}`;
 }
 
 /**

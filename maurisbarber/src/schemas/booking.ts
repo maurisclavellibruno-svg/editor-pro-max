@@ -20,6 +20,14 @@ export const createBookingSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === "true"),
+  // Captured from the ad's URL (utm_source/utm_campaign/utm_content) and
+  // carried through to here so which campaign drove a booking is visible in
+  // its notes — see actions/booking.ts. FormData.get() returns null (not
+  // undefined) for an absent field, which plain .optional() rejects — same
+  // gotcha as Prisma's nullable columns, so .nullable() first.
+  utmSource: z.string().trim().max(60).nullable().optional().transform((v) => v ?? ""),
+  utmCampaign: z.string().trim().max(60).nullable().optional().transform((v) => v ?? ""),
+  utmContent: z.string().trim().max(60).nullable().optional().transform((v) => v ?? ""),
 });
 
 export type CreateBookingInput = z.infer<typeof createBookingSchema>;

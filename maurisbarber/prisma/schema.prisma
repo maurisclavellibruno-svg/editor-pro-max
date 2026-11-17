@@ -69,6 +69,30 @@ model Service {
   imageUrl    String?
   active      Boolean @default(true)
 
+  // Stable identifier for deep links like /reservar?servicio=asesoria-corte —
+  // independent of `name` so renaming a service in the admin never breaks a
+  // link already out in an ad.
+  slug String? @unique
+
+  // Landing page presentation only — doesn't affect scheduling.
+  featured Boolean @default(false) // shown as the big featured product card
+  badge    String? // e.g. "El más elegido", shown on the featured card
+  category String  @default("general") // "general" | "color" (grouped/collapsed on the landing)
+
+  // Time-boxed discount shown as a struck-through price. Both dates must be
+  // set for the promo to ever apply — see lib/pricing.ts.
+  promoPrice    Decimal?  @db.Decimal(10, 2)
+  promoStartsAt DateTime?
+  promoEndsAt   DateTime?
+
+  // Exact-date price override (e.g. "Corte" costs $750 on 24/12 and 31/12) —
+  // takes priority over both the base price and the promo. Dates are
+  // "YYYY-MM-DD" strings compared against America/Montevideo's calendar day,
+  // not DateTime ranges, so there's no timezone ambiguity about which day a
+  // given instant falls on. See lib/pricing.ts.
+  specialPrice Decimal? @db.Decimal(10, 2)
+  specialDates String[] // "YYYY-MM-DD" entries
+
   schedulingMode   SchedulingMode @default(CONSECUTIVE)
   frequencyMinutes Int? // used when schedulingMode = CUSTOM_FREQUENCY
   manualSlots      String[] // "HH:mm" entries, used when schedulingMode = MANUAL

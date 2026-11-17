@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Section } from "@/components/ui/Section";
 import { BeforeAfterSlider } from "@/components/landing/BeforeAfterSlider";
 
@@ -21,7 +22,7 @@ const results = [
   },
 ];
 
-export function ResultsGallery() {
+export function ResultsGallery({ reservarHref }: { reservarHref: string }) {
   return (
     <Section
       eyebrow="Resultados"
@@ -38,6 +39,14 @@ export function ResultsGallery() {
             alt={result.alt}
           />
         ))}
+      </div>
+      <div className="mt-8 text-center">
+        <Link
+          href={reservarHref}
+          className="inline-flex h-12 items-center justify-center rounded-full bg-gold px-8 text-sm font-medium text-noir transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          Quiero mi asesoría
+        </Link>
       </div>
     </Section>
   );

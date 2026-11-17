@@ -28,9 +28,10 @@ export async function Testimonials() {
   });
 
   const real = approved.map((r) => ({ name: r.name, quote: r.text, rating: r.rating }));
-  // Show every real review that's been approved. Only fall back to the
-  // placeholders while there isn't a single real one yet.
-  const testimonials = real.length > 0 ? real : placeholders;
+  // Show every real review that's been approved, best-rated first. Only
+  // fall back to the placeholders while there isn't a single real one yet.
+  const sorted = real.length > 0 ? [...real].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)) : placeholders;
+  const top4 = sorted.slice(0, 4);
 
   return (
     <Section
@@ -39,11 +40,11 @@ export async function Testimonials() {
       title="Lo que dicen nuestros clientes"
       className="bg-noir-soft"
     >
-      <div className="grid gap-4 sm:grid-cols-3">
-        {testimonials.map((t) => (
+      <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-4 sm:overflow-visible">
+        {top4.map((t) => (
           <blockquote
             key={t.name + t.quote}
-            className="rounded-2xl border border-gold/15 bg-noir p-6"
+            className="w-[82vw] shrink-0 rounded-2xl border border-gold/15 bg-noir p-6 sm:w-auto"
           >
             {t.rating && (
               <p className="mb-2 text-gold" aria-label={`${t.rating} de 5 estrellas`}>

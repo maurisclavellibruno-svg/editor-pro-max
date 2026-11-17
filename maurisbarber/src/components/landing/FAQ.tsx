@@ -5,24 +5,28 @@ import { Section } from "@/components/ui/Section";
 
 const faqs = [
   {
-    q: "¿En qué consiste la asesoría?",
-    a: "Antes de cortar, analizamos la forma de tu rostro, tus facciones, tu estilo de vida y lo que querés transmitir, para recomendarte el corte que realmente te favorece — no uno al azar.",
+    q: "¿Qué es la asesoría?",
+    a: "Antes de cortar analizo tu cara, tu pelo y tu estilo de vida, y elijo el corte que mejor te queda. Te lo hago en el momento y te llevás un PDF con todo.",
   },
   {
-    q: "¿Cómo reservo mi asesoría?",
-    a: "Tocá el botón \"Reservar turno\", elegí el servicio, el día y el horario que prefieras, dejá tus datos de contacto y listo.",
+    q: "¿Tengo que pagar antes?",
+    a: "Para el corte, no: pagás en el local. Para la asesoría pedimos una seña de $500 por Prex, que se descuenta del total.",
   },
   {
-    q: "¿Necesito pagar por adelantado?",
-    a: "No, el pago se realiza en el local al finalizar el servicio. Por ahora aceptamos efectivo y transferencia.",
+    q: "¿Cómo pago?",
+    a: "Efectivo o transferencia.",
   },
   {
-    q: "¿Puedo cancelar o reprogramar mi turno?",
-    a: "Sí, escribinos por WhatsApp con la mayor anticipación posible para reprogramar o cancelar tu turno.",
+    q: "¿Dónde quedan?",
+    a: "Av. Gonzalo Ramírez 1686, Apto. 002, Montevideo. Tocá timbre y te abro.",
   },
   {
-    q: "¿Qué pasa si llego tarde?",
-    a: "Intentamos ser flexibles, pero para respetar a todos los clientes te pedimos llegar a horario. Si vas a demorarte, avisanos por WhatsApp.",
+    q: "¿Puedo cambiar o cancelar el turno?",
+    a: "Sí, avisanos por WhatsApp con la mayor anticipación posible.",
+  },
+  {
+    q: "¿Hacen gift cards?",
+    a: "Sí, de asesoría + corte o de corte. Te la mandamos por WhatsApp, lista para regalar.",
   },
 ];
 

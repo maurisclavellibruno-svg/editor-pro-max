@@ -8,6 +8,7 @@ import { createBookingSchema } from "@/schemas/booking";
 import { dateWithMinutes, timeToMinutes } from "@/lib/time";
 import { isRateLimited } from "@/lib/rate-limit";
 import { syncBookingBestEffort } from "@/lib/calendar-sync";
+import { getEffectivePrice } from "@/lib/pricing";
 
 export interface CreateBookingResult {
   ok: boolean;
@@ -32,6 +33,9 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     phone: formData.get("phone"),
     email: formData.get("email"),
     joinLoyaltyCard: formData.get("joinLoyaltyCard"),
+    utmSource: formData.get("utmSource"),
+    utmCampaign: formData.get("utmCampaign"),
+    utmContent: formData.get("utmContent"),
   };
 
   const parsed = createBookingSchema.safeParse(raw);
@@ -57,6 +61,28 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
 
   const startAt = dateWithMinutes(data.date, timeToMinutes(data.time));
   const endAt = dateWithMinutes(data.date, timeToMinutes(data.time) + service.duration);
+
+  // Priced as of the appointment's day (a holiday-override or promo price
+  // is about that calendar day, not "whenever someone happened to book").
+  const effectivePrice = getEffectivePrice(
+    {
+      price: Number(service.price),
+      promoPrice: service.promoPrice !== null ? Number(service.promoPrice) : null,
+      promoStartsAt: service.promoStartsAt,
+      promoEndsAt: service.promoEndsAt,
+      specialPrice: service.specialPrice !== null ? Number(service.specialPrice) : null,
+      specialDates: service.specialDates,
+    },
+    startAt,
+  );
+
+  const utmNote = [
+    data.utmSource && `utm_source=${data.utmSource}`,
+    data.utmCampaign && `utm_campaign=${data.utmCampaign}`,
+    data.utmContent && `utm_content=${data.utmContent}`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   const customer = await prisma.customer.upsert({
     where: { phone: data.phone },
@@ -84,8 +110,9 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
       employeeId,
       startAt,
       endAt,
-      price: service.price,
+      price: effectivePrice.price,
       status: "PENDING",
+      notes: utmNote,
     },
   });
 
@@ -95,7 +122,7 @@ export async function createBooking(formData: FormData): Promise<CreateBookingRe
     customerEmail: data.email || null,
     serviceName: service.name,
     startAt,
-    price: Number(service.price),
+    price: effectivePrice.price,
   };
   // The booking already exists in the database — it's confirmed for the
   // customer regardless of what happens next. Notifications and the calendar

@@ -36,22 +36,6 @@ body {
   color-scheme: dark;
 }
 
-/* Hero signature line — see components/landing/Hero.tsx. Kept as a real
-   stylesheet rule (not a Tailwind utility + inline style) so the
-   prefers-reduced-motion override below can reliably win: overriding an
-   inline style from a stylesheet needs !important and is easy to miss. */
-.draw-line-path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: draw-line 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.5s both;
-}
-
-@keyframes draw-line {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 /* Scroll-reveal: see components/ui/Reveal.tsx */
 .reveal {
   opacity: 0;
@@ -63,40 +47,17 @@ body {
   transform: translateY(0);
 }
 
-/* Continuous marquee loop — see components/landing/Marquee.tsx */
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-.marquee-track {
-  animation: marquee-scroll 22s linear infinite;
-}
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
 .custom-cursor {
   display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee-track {
-    animation: none;
-  }
   .animate-pulse-ring,
   .animate-rise-in,
   .animate-fade-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
-  }
-  .draw-line-path {
-    animation: none;
-    stroke-dashoffset: 0;
   }
   .reveal {
     opacity: 1;

@@ -15,11 +15,11 @@ export function GiftCards({ whatsappNumber }: { whatsappNumber: string }) {
     <section className="w-full bg-noir-soft px-6 py-16 text-ivory sm:py-24">
       <div className="mx-auto max-w-5xl text-center">
         <h2 className="font-display text-3xl font-semibold tracking-tight text-ivory sm:text-4xl">
-          ¿No sabés qué regalarle?
+          ¿No sabés qué regalarle a tu novio, hijo o nieto?
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-ivory-soft">
-          Vos elegís el monto. Vale para cualquier corte, asesoría o lo que ella quiera — si no le
-          alcanza para todo, paga la diferencia. Te la mando por WhatsApp, lista para regalar. Vale
+          Una gift card. Vos elegís el monto. Vale para cualquier corte, asesoría o lo que él quiera — si
+          no le alcanza para todo, paga la diferencia. Te la mando por WhatsApp, lista para regalar. Vale
           por 3 meses.
         </p>
 

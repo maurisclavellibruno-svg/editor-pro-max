@@ -47,9 +47,6 @@ export default async function LandingPage({
     specialDates: s.specialDates,
   }));
 
-  const advisoryService = previewServices.find((s) => s.slug === "asesoria-corte") ?? null;
-  const cutService = previewServices.find((s) => s.slug === "corte") ?? null;
-
   const utmQs = new URLSearchParams(
     Object.entries(utm).filter((e): e is [string, string] => Boolean(e[1])),
   ).toString();
@@ -65,7 +62,7 @@ export default async function LandingPage({
       <ResultsGallery reservarHref={advisoryHref} />
       <HowItWorks />
       <Testimonials />
-      <GiftCards advisoryService={advisoryService} cutService={cutService} whatsappNumber={shop.whatsappNumber} />
+      <GiftCards whatsappNumber={shop.whatsappNumber} />
       <FAQ />
       <HoursAndContact hours={hours} phone={shop.phone} address={shop.address} mapsEmbedUrl={shop.mapsEmbedUrl} mapsUrl={mapsUrl} />
       <footer className="border-t border-gold/15 bg-noir px-6 py-10 text-center text-sm text-ivory-soft">

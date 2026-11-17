@@ -11,7 +11,10 @@ export async function getBarbershop() {
 }
 
 export async function getActiveServices() {
-  return prisma.service.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } });
+  return prisma.service.findMany({
+    where: { active: true },
+    orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }],
+  });
 }
 
 export async function getBusinessHours() {

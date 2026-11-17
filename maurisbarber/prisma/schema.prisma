@@ -79,6 +79,11 @@ model Service {
   badge    String? // e.g. "El más elegido", shown on the featured card
   category String  @default("general") // "general" | "color" (grouped/collapsed on the landing)
 
+  // Business priority, not creation date — the booking list and the landing
+  // page's product cards show services in this order (ascending), not by
+  // when they happened to be created in the admin.
+  displayOrder Int @default(0)
+
   // Time-boxed discount shown as a struck-through price. Both dates must be
   // set for the promo to ever apply — see lib/pricing.ts.
   promoPrice    Decimal?  @db.Decimal(10, 2)

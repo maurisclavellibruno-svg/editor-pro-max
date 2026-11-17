@@ -56,6 +56,10 @@ export function BookingWizard({
 }) {
   const router = useRouter();
   const initialService = initialServiceSlug ? services.find((s) => s.slug === initialServiceSlug) : null;
+  // Arrived via a specific service's "Reservar" link on the home page — the
+  // "service" step was never shown, so "Atrás" must never land there either
+  // (that reopens the question the customer already answered by clicking).
+  const lockedService = Boolean(initialService);
 
   const [step, setStep] = useState<Step>(() => {
     if (!initialService) return "service";
@@ -292,7 +296,7 @@ export function BookingWizard({
                 <p className="font-medium text-ivory">{employee.name}</p>
               </button>
             ))}
-            <BackButton onClick={() => setStep("service")} />
+            <BackButton onClick={() => (lockedService ? router.push("/#servicios") : setStep("service"))} />
           </div>
         )}
 
@@ -314,7 +318,13 @@ export function BookingWizard({
                 loadingDisabled={loadingDisabledDates}
               />
             </div>
-            <BackButton onClick={() => setStep(employees.length > 1 ? "barbero" : "service")} />
+            <BackButton
+              onClick={() => {
+                if (employees.length > 1) return setStep("barbero");
+                if (lockedService) return router.push("/#servicios");
+                return setStep("service");
+              }}
+            />
           </div>
         )}
 

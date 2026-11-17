@@ -4,7 +4,7 @@ import { ServicesManager } from "@/components/admin/ServicesManager";
 export const dynamic = "force-dynamic";
 
 export default async function ServiciosPage() {
-  const services = await prisma.service.findMany({ orderBy: { createdAt: "asc" } });
+  const services = await prisma.service.findMany({ orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }] });
 
   return (
     <ServicesManager

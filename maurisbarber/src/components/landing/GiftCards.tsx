@@ -1,25 +1,16 @@
 "use client";
 
-import { getEffectivePrice, type PriceableService } from "@/lib/pricing";
 import { whatsappHref, normalizeUyPhone } from "@/lib/whatsapp";
 import { trackMetaEvent } from "@/lib/metaPixel";
 
-interface GiftCardService extends PriceableService {
-  name: string;
-}
+const EXAMPLE_AMOUNTS = ["$500", "$1.000", "$1.500", "El monto que quieras"];
 
-export function GiftCards({
-  advisoryService,
-  cutService,
-  whatsappNumber,
-}: {
-  advisoryService: GiftCardService | null;
-  cutService: GiftCardService | null;
-  whatsappNumber: string;
-}) {
-  const cards = [advisoryService, cutService].filter((s): s is GiftCardService => s !== null);
-  if (cards.length === 0) return null;
-
+// Open-amount gift card — not tied to a specific service or price. Mauris
+// and the buyer agree the amount over WhatsApp; it can go toward any
+// service (fully or partially — the recipient tops up the difference if it
+// doesn't cover the full price). See the GiftCard/CustomerMembership models
+// in the admin for how it's redeemed.
+export function GiftCards({ whatsappNumber }: { whatsappNumber: string }) {
   return (
     <section className="w-full bg-noir-soft px-6 py-16 text-ivory sm:py-24">
       <div className="mx-auto max-w-5xl text-center">
@@ -27,25 +18,20 @@ export function GiftCards({
           ¿No sabés qué regalarle?
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-ivory-soft">
-          Regalale un cambio que se nota. Te mando la gift card por WhatsApp, lista para regalar. Vale
+          Vos elegís el monto. Vale para cualquier corte, asesoría o lo que ella quiera — si no le
+          alcanza para todo, paga la diferencia. Te la mando por WhatsApp, lista para regalar. Vale
           por 3 meses.
         </p>
 
-        <div className="mx-auto mt-8 grid max-w-2xl gap-4 sm:grid-cols-2">
-          {cards.map((service) => {
-            const price = getEffectivePrice(service);
-            return (
-              <div key={service.name} className="rounded-2xl border border-gold/20 bg-noir p-6">
-                <p className="font-display font-semibold text-ivory">Gift card {service.name}</p>
-                <p className="mt-2">
-                  {price.originalPrice && (
-                    <span className="mr-2 text-ivory-soft/60 line-through">${price.originalPrice}</span>
-                  )}
-                  <span className="font-display text-2xl font-semibold text-gold">${price.price}</span>
-                </p>
-              </div>
-            );
-          })}
+        <div className="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2">
+          {EXAMPLE_AMOUNTS.map((amount) => (
+            <span
+              key={amount}
+              className="rounded-full border border-gold/20 bg-noir px-4 py-2 text-sm text-ivory-soft"
+            >
+              {amount}
+            </span>
+          ))}
         </div>
 
         <a

@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AgendaPage() {
   const [services, employees] = await Promise.all([
-    prisma.service.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
+    prisma.service.findMany({ where: { active: true }, orderBy: [{ displayOrder: "asc" }, { createdAt: "asc" }] }),
     prisma.employee.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
   ]);
 

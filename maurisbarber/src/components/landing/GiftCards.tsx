@@ -35,7 +35,10 @@ export function GiftCards({ whatsappNumber }: { whatsappNumber: string }) {
         </div>
 
         <a
-          href={whatsappHref(normalizeUyPhone(whatsappNumber), "Hola, quiero una gift card")}
+          href={whatsappHref(
+            normalizeUyPhone(whatsappNumber),
+            "Hola, quiero una gift card de $... (poné acá el monto que querés)",
+          )}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => trackMetaEvent("Contact")}

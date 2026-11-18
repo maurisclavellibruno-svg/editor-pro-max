@@ -36,7 +36,7 @@ export function Hero({ name, nextSlotLabel }: HeroProps) {
             href="#servicios"
             className="mt-5 inline-flex h-14 w-full items-center justify-center rounded-full bg-gold px-8 text-lg font-medium text-noir shadow-gold transition-transform hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
           >
-            Ver servicios y reservar
+            Ver servicios
           </a>
           <p className="mt-2 text-xs text-ivory-soft/70">Reservás en 1 minuto · Sin crear cuenta</p>
         </div>

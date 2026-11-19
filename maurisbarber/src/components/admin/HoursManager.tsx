@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/Button";
 import {
   deleteBlockedDate,
   deleteBreakTime,
+  deleteSpecialDayHours,
   upsertBlockedDate,
   upsertBreakTime,
   upsertBusinessHours,
+  upsertSpecialDayHours,
 } from "@/actions/schedule";
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -32,23 +34,115 @@ interface Block {
   reason: string;
   type: "HOLIDAY" | "VACATION" | "MANUAL_BLOCK";
 }
+interface SpecialDay {
+  id: string;
+  date: string;
+  openTime: string;
+  closeTime: string;
+  reason: string;
+}
 
 export function HoursManager({
   hours,
   breaks,
   blocks,
+  specialDays,
 }: {
   hours: Hours[];
   breaks: Break[];
   blocks: Block[];
+  specialDays: SpecialDay[];
 }) {
   return (
     <div className="space-y-10">
       <h1 className="text-2xl font-semibold text-ink">Horarios</h1>
       <BusinessHoursSection hours={hours} />
+      <SpecialDaysSection specialDays={specialDays} />
       <BreaksSection breaks={breaks} />
       <BlocksSection blocks={blocks} />
     </div>
+  );
+}
+
+function SpecialDaysSection({ specialDays }: { specialDays: SpecialDay[] }) {
+  const [list, setList] = useState(specialDays);
+  const [form, setForm] = useState<Omit<SpecialDay, "id">>({
+    date: new Date().toISOString().slice(0, 10),
+    openTime: "10:00",
+    closeTime: "20:00",
+    reason: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  async function add() {
+    setSaving(true);
+    await upsertSpecialDayHours(form);
+    setList((prev) => [...prev.filter((d) => d.date !== form.date), { ...form, id: crypto.randomUUID() }].sort(
+      (a, b) => a.date.localeCompare(b.date),
+    ));
+    setSaving(false);
+  }
+
+  async function remove(id: string) {
+    await deleteSpecialDayHours(id);
+    setList(list.filter((d) => d.id !== id));
+  }
+
+  return (
+    <section>
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink-muted">
+        Horarios especiales por fecha
+      </h2>
+      <p className="mb-3 text-sm text-ink-muted">
+        Para un día puntual (ej. más turnos el 24/12, o abrir un día que normalmente está cerrado). El
+        horario que pongas acá reemplaza al horario semanal normal solo ese día.
+      </p>
+      <div className="space-y-2 rounded-2xl border border-line bg-white p-5 shadow-card">
+        {list.length === 0 && <p className="text-sm text-ink-muted">No hay horarios especiales cargados.</p>}
+        {list.map((d) => (
+          <div key={d.id} className="flex items-center justify-between text-sm">
+            <span>
+              {d.date}: {d.openTime}–{d.closeTime}
+              {d.reason && <span className="text-ink-muted"> ({d.reason})</span>}
+            </span>
+            <button className="text-red-600" onClick={() => remove(d.id)}>
+              Quitar
+            </button>
+          </div>
+        ))}
+        <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-line pt-4">
+          <input
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm({ ...form, date: e.target.value })}
+            className="rounded-xl border border-line px-3 py-2 text-sm"
+          />
+          <input
+            type="time"
+            value={form.openTime}
+            onChange={(e) => setForm({ ...form, openTime: e.target.value })}
+            className="rounded-xl border border-line px-3 py-2 text-sm"
+          />
+          <span className="text-ink-muted">a</span>
+          <input
+            type="time"
+            value={form.closeTime}
+            onChange={(e) => setForm({ ...form, closeTime: e.target.value })}
+            className="rounded-xl border border-line px-3 py-2 text-sm"
+          />
+          <input
+            type="text"
+            value={form.reason}
+            onChange={(e) => setForm({ ...form, reason: e.target.value })}
+            placeholder="Motivo (opcional)"
+            className="w-40 rounded-xl border border-line px-3 py-2 text-sm"
+          />
+          <Button size="sm" variant="accent" onClick={add} disabled={saving}>
+            {saving ? "Guardando…" : "+ Agregar"}
+          </Button>
+        </div>
+      </div>
+    </section>
   );
 }
 

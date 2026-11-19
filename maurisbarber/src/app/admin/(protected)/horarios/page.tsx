@@ -4,10 +4,11 @@ import { HoursManager } from "@/components/admin/HoursManager";
 export const dynamic = "force-dynamic";
 
 export default async function HorariosPage() {
-  const [hours, breaks, blocks] = await Promise.all([
+  const [hours, breaks, blocks, specialDays] = await Promise.all([
     prisma.businessHours.findMany({ orderBy: { dayOfWeek: "asc" } }),
     prisma.breakTime.findMany({ orderBy: { dayOfWeek: "asc" } }),
     prisma.blockedDate.findMany({ orderBy: { startDate: "desc" } }),
+    prisma.specialDayHours.findMany({ orderBy: { date: "asc" } }),
   ]);
 
   return (
@@ -21,6 +22,7 @@ export default async function HorariosPage() {
         reason: b.reason,
         type: b.type,
       }))}
+      specialDays={specialDays}
     />
   );
 }

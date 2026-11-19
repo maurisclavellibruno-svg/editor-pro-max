@@ -18,6 +18,10 @@ export const serviceSchema = z
     frequencyMinutes: z.coerce.number().int().min(1).nullable().optional(),
     manualSlots: z.array(z.string().regex(timeRegex)).optional().default([]),
     allowsParallel: z.coerce.boolean().default(false),
+    restrictedDates: z
+      .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
+      .optional()
+      .default([]),
   })
   .superRefine((data, ctx) => {
     if (data.schedulingMode === "CUSTOM_FREQUENCY" && !data.frequencyMinutes) {
@@ -59,4 +63,12 @@ export const blockedDateSchema = z.object({
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   reason: z.string().trim().min(1).max(200),
   type: z.enum(["HOLIDAY", "VACATION", "MANUAL_BLOCK"]),
+});
+
+export const specialDayHoursSchema = z.object({
+  id: z.string().cuid().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  openTime: z.string().regex(timeRegex),
+  closeTime: z.string().regex(timeRegex),
+  reason: z.string().trim().max(200).optional().default(""),
 });

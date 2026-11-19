@@ -21,6 +21,7 @@ export default async function ServiciosPage() {
         frequencyMinutes: s.frequencyMinutes,
         manualSlots: s.manualSlots,
         allowsParallel: s.allowsParallel,
+        restrictedDates: s.restrictedDates,
       }))}
     />
   );

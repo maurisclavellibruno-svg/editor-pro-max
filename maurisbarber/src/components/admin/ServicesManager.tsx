@@ -19,6 +19,7 @@ interface Service {
   frequencyMinutes: number | null;
   manualSlots: string[];
   allowsParallel: boolean;
+  restrictedDates: string[];
 }
 
 const emptyForm: Service = {
@@ -34,6 +35,7 @@ const emptyForm: Service = {
   frequencyMinutes: 15,
   manualSlots: [],
   allowsParallel: false,
+  restrictedDates: [],
 };
 
 export function ServicesManager({ services }: { services: Service[] }) {
@@ -75,6 +77,8 @@ export function ServicesManager({ services }: { services: Service[] }) {
                   {service.schedulingMode === "CUSTOM_FREQUENCY" && `Cada ${service.frequencyMinutes} min`}
                   {service.schedulingMode === "MANUAL" && "Horarios manuales"}
                   {service.allowsParallel && " · Trabajo en paralelo"}
+                  {service.restrictedDates.length > 0 &&
+                    ` · Solo ${service.restrictedDates.join(", ")}`}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -156,6 +160,21 @@ function ServiceFormModal({
 
   function removeManualSlot(index: number) {
     setForm((f) => ({ ...f, manualSlots: f.manualSlots.filter((_, i) => i !== index) }));
+  }
+
+  const [newRestrictedDate, setNewRestrictedDate] = useState("");
+
+  function addRestrictedDate() {
+    if (!newRestrictedDate || form.restrictedDates.includes(newRestrictedDate)) return;
+    setForm((f) => ({
+      ...f,
+      restrictedDates: [...f.restrictedDates, newRestrictedDate].sort(),
+    }));
+    setNewRestrictedDate("");
+  }
+
+  function removeRestrictedDate(date: string) {
+    setForm((f) => ({ ...f, restrictedDates: f.restrictedDates.filter((d) => d !== date) }));
   }
 
   return (
@@ -281,6 +300,39 @@ function ServiceFormModal({
                 </p>
               </span>
             </label>
+          </div>
+
+          <div className="rounded-xl border border-line p-4">
+            <p className="text-sm font-semibold text-ink">Fechas en las que se puede reservar</p>
+            <p className="mt-1 text-sm text-ink-muted">
+              Dejalo vacío para que se pueda reservar cualquier día (lo normal). Agregá fechas solo para un
+              servicio que únicamente aplica esos días — ej. un precio de fiestas que solo vale el 21 y 22
+              de diciembre.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {form.restrictedDates.map((date) => (
+                <span
+                  key={date}
+                  className="flex items-center gap-1.5 rounded-full border border-line bg-surface-alt px-3 py-1 text-xs text-ink"
+                >
+                  {date}
+                  <button type="button" onClick={() => removeRestrictedDate(date)} className="text-red-600">
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <input
+                type="date"
+                value={newRestrictedDate}
+                onChange={(e) => setNewRestrictedDate(e.target.value)}
+                className="rounded-xl border border-line px-3 py-2 text-sm"
+              />
+              <button type="button" onClick={addRestrictedDate} className="text-sm font-medium text-accent">
+                + Agregar fecha
+              </button>
+            </div>
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}

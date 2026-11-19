@@ -18,6 +18,11 @@ type ServiceForScheduling = {
   manualSlots: string[];
 };
 
+/** True if this service can be booked at all on `date`, per its restrictedDates (if any). */
+function isDateAllowedForService(service: { restrictedDates: string[] }, date: string): boolean {
+  return service.restrictedDates.length === 0 || service.restrictedDates.includes(date);
+}
+
 /**
  * Returns the list of bookable "HH:mm" start times for a service on a given
  * day, taking into account business hours, breaks, blocked dates, and
@@ -38,6 +43,7 @@ export async function getAvailableSlots({
 }: AvailabilityInput): Promise<string[]> {
   const service = await prisma.service.findUnique({ where: { id: serviceId } });
   if (!service || !service.active) return [];
+  if (!isDateAllowedForService(service, date)) return [];
 
   const employees = employeeId
     ? await prisma.employee.findMany({ where: { id: employeeId } })
@@ -118,11 +124,8 @@ interface DayInfo {
 }
 
 async function getDayInfo(date: string): Promise<DayInfo | null> {
-  const dow = dayOfWeek(date);
-
-  const hours = await prisma.businessHours.findUnique({ where: { dayOfWeek: dow } });
-  if (!hours || hours.isClosed) return null;
-
+  // A manual block always wins, even over special hours for the same date —
+  // it's the explicit "no, actually closed" override.
   const dayStart = new Date(date + "T00:00:00");
   const dayEnd = new Date(date + "T23:59:59.999");
   const fullDayBlock = await prisma.blockedDate.findFirst({
@@ -130,7 +133,19 @@ async function getDayInfo(date: string): Promise<DayInfo | null> {
   });
   if (fullDayBlock) return null;
 
+  const dow = dayOfWeek(date);
   const breaks = await prisma.breakTime.findMany({ where: { dayOfWeek: dow } });
+
+  // Special hours for this exact date override the regular weekly schedule
+  // — including opening a day that's normally closed (e.g. extra turnos for
+  // 24/12 on what would be a closed Thursday).
+  const special = await prisma.specialDayHours.findUnique({ where: { date } });
+  if (special) {
+    return { openMin: timeToMinutes(special.openTime), closeMin: timeToMinutes(special.closeTime), breaks };
+  }
+
+  const hours = await prisma.businessHours.findUnique({ where: { dayOfWeek: dow } });
+  if (!hours || hours.isClosed) return null;
 
   return {
     openMin: timeToMinutes(hours.openTime),
@@ -235,6 +250,7 @@ export function formatNextSlotLabel(dateStr: string, time: string): string {
 export async function pickAvailableEmployee(input: AvailabilityInput & { time: string }): Promise<string | null> {
   const service = await prisma.service.findUnique({ where: { id: input.serviceId } });
   if (!service || !service.active) return null;
+  if (!isDateAllowedForService(service, input.date)) return null;
 
   const employees = input.employeeId
     ? await prisma.employee.findMany({ where: { id: input.employeeId } })

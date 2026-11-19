@@ -27,6 +27,7 @@ export async function upsertService(input: unknown) {
     frequencyMinutes: data.schedulingMode === "CUSTOM_FREQUENCY" ? data.frequencyMinutes : null,
     manualSlots: data.schedulingMode === "MANUAL" ? data.manualSlots : [],
     allowsParallel: data.allowsParallel,
+    restrictedDates: data.restrictedDates,
   };
 
   if (data.id) {

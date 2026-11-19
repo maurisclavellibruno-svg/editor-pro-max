@@ -98,6 +98,14 @@ model Service {
   specialPrice Decimal? @db.Decimal(10, 2)
   specialDates String[] // "YYYY-MM-DD" entries
 
+  // If non-empty, this service can ONLY be booked on these exact calendar
+  // dates — e.g. a holiday-only offer bookable just 21/12 and 22/12. Empty
+  // (the default) means no restriction: bookable any day the shop is open,
+  // same as today. Unlike specialDates/specialPrice above (a price override
+  // that doesn't touch availability), this removes every slot on any other
+  // date — see lib/availability.ts.
+  restrictedDates String[] // "YYYY-MM-DD" entries; empty = no restriction
+
   schedulingMode   SchedulingMode @default(CONSECUTIVE)
   frequencyMinutes Int? // used when schedulingMode = CUSTOM_FREQUENCY
   manualSlots      String[] // "HH:mm" entries, used when schedulingMode = MANUAL
@@ -127,6 +135,21 @@ model BreakTime {
   startTime String // "HH:mm"
   endTime   String // "HH:mm"
   label     String @default("Descanso")
+}
+
+// A specific calendar date's hours, overriding whatever the regular
+// day-of-week BusinessHours says for that date — e.g. "24/12 opens 10:00 to
+// 22:00" instead of that Thursday's normal hours, including opening a day
+// that's normally closed. The opposite case (closing a date that would
+// otherwise be open) is BlockedDate, which still wins if both exist for the
+// same date — see lib/availability.ts getDayInfo.
+model SpecialDayHours {
+  id        String   @id @default(cuid())
+  date      String   @unique // "YYYY-MM-DD"
+  openTime  String // "HH:mm"
+  closeTime String // "HH:mm"
+  reason    String   @default("")
+  createdAt DateTime @default(now())
 }
 
 enum BlockedDateType {
